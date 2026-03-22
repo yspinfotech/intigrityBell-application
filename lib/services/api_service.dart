@@ -1,0 +1,122 @@
+import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
+
+class ApiService {
+  /// ─── IMPORTANT: Set this to your machine's local IP when testing on a real device.
+  /// For Android Emulator → 10.0.2.2
+  /// For Real Device        → your machine's WiFi IP (e.g. 192.168.1.X)
+  static const String _serverHost = '192.168.1.16'; // ← Change this to your IP
+  static const int _serverPort = 8000;
+
+  static String get baseUrl => 'http://$_serverHost:$_serverPort/api';
+
+  static String? _token;
+
+  static void setToken(String? token) {
+    _token = token;
+  }
+
+  static String? get currentToken => _token;
+
+  static Map<String, String> _buildHeaders({String? token}) {
+    final effectiveToken = token ?? _token;
+    final headers = <String, String>{
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+    if (effectiveToken != null && effectiveToken.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $effectiveToken';
+    }
+    return headers;
+  }
+
+  // GET
+  static Future<http.Response> get(String endpoint, {String? token}) async {
+    try {
+      final uri = Uri.parse('$baseUrl$endpoint');
+      debugPrint('[API GET] $uri');
+      final response = await http
+          .get(uri, headers: _buildHeaders(token: token))
+          .timeout(const Duration(seconds: 15));
+      debugPrint('[API GET] ${response.statusCode} $endpoint');
+      return response;
+    } catch (e) {
+      debugPrint('[API GET ERROR] $endpoint → $e');
+      rethrow;
+    }
+  }
+
+  // POST
+  static Future<http.Response> post(String endpoint, Map<String, dynamic> body,
+      {String? token}) async {
+    try {
+      final uri = Uri.parse('$baseUrl$endpoint');
+      debugPrint('[API POST] $uri');
+      final response = await http
+          .post(uri, headers: _buildHeaders(token: token), body: jsonEncode(body))
+          .timeout(const Duration(seconds: 15));
+      debugPrint('[API POST] ${response.statusCode} $endpoint');
+      return response;
+    } catch (e) {
+      debugPrint('[API POST ERROR] $endpoint → $e');
+      rethrow;
+    }
+  }
+
+  // PUT
+  static Future<http.Response> put(String endpoint, Map<String, dynamic> body,
+      {String? token}) async {
+    try {
+      final uri = Uri.parse('$baseUrl$endpoint');
+      debugPrint('[API PUT] $uri');
+      final response = await http
+          .put(uri, headers: _buildHeaders(token: token), body: jsonEncode(body))
+          .timeout(const Duration(seconds: 15));
+      debugPrint('[API PUT] ${response.statusCode} $endpoint');
+      return response;
+    } catch (e) {
+      debugPrint('[API PUT ERROR] $endpoint → $e');
+      rethrow;
+    }
+  }
+
+  // DELETE
+  static Future<http.Response> delete(String endpoint, {String? token}) async {
+    try {
+      final uri = Uri.parse('$baseUrl$endpoint');
+      debugPrint('[API DELETE] $uri');
+      final response = await http
+          .delete(uri, headers: _buildHeaders(token: token))
+          .timeout(const Duration(seconds: 15));
+      debugPrint('[API DELETE] ${response.statusCode} $endpoint');
+      return response;
+    } catch (e) {
+      debugPrint('[API DELETE ERROR] $endpoint → $e');
+      rethrow;
+    }
+  }
+
+  // Multipart POST (for file uploads)
+  static Future<http.StreamedResponse> postMultipart(
+    String endpoint,
+    Map<String, String> fields, {
+    String? filePath,
+    String? fileField = 'file',
+    String? token,
+  }) async {
+    final uri = Uri.parse('$baseUrl$endpoint');
+    final request = http.MultipartRequest('POST', uri);
+    final effectiveToken = token ?? _token;
+    if (effectiveToken != null) {
+      request.headers['Authorization'] = 'Bearer $effectiveToken';
+    }
+    request.fields.addAll(fields);
+    if (filePath != null) {
+      request.files
+          .add(await http.MultipartFile.fromPath(fileField!, filePath));
+    }
+    return await request.send();
+  }
+}

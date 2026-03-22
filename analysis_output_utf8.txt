@@ -1,0 +1,490 @@
+﻿Resolving dependencies...
+Downloading packages...
+  flutter_lints 3.0.2 (6.0.0 available)
+  flutter_local_notifications 17.2.4 (21.0.0 available)
+  flutter_local_notifications_linux 4.0.1 (8.0.0 available)
+  flutter_local_notifications_platform_interface 7.2.0 (11.0.0 available)
+  google_fonts 6.3.3 (8.0.2 available)
+  intl 0.18.1 (0.20.2 available)
+  lints 3.0.0 (6.1.0 available)
+  meta 1.17.0 (1.18.2 available)
+  table_calendar 3.0.9 (3.2.0 available)
+  test_api 0.7.10 (0.7.11 available)
+  timezone 0.9.4 (0.11.0 available)
+  vector_math 2.2.0 (2.3.0 available)
+Got dependencies!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Analyzing intigrity...                                          
+
+warning - Unused import: 'screens/event_details_screen.dart' - lib\main.dart:12:8 - unused_import
+warning - Unused import: 'screens/plan_my_day_screen.dart' - lib\main.dart:15:8 - unused_import
+  error - A value of type 'int' can't be assigned to a variable of type 'String' - lib\models\event_model.dart:73:30 - invalid_assignment
+  error - A value of type 'int' can't be assigned to a variable of type 'String' - lib\models\event_model.dart:74:32 - invalid_assignment
+  error - A value of type 'int' can't be assigned to a variable of type 'String' - lib\models\event_model.dart:77:28 - invalid_assignment
+  error - A value of type 'int' can't be assigned to a variable of type 'String' - lib\models\event_model.dart:78:30 - invalid_assignment
+   info - The private field _events could be 'final' - lib\providers\event_provider.dart:9:15 - prefer_final_fields
+   info - Constructors for public widgets should have a named 'key' parameter - lib\screens\add_event_screen.dart:6:7 - use_key_in_widget_constructors
+   info - Invalid use of a private type in a public API - lib\screens\add_event_screen.dart:8:3 - library_private_types_in_public_api
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:30:9 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:30:27 - prefer_const_constructors
+  error - The getter 'existingNote' isn't defined for the type 'AddEventScreen' - lib\screens\add_event_screen.dart:36:18 - undefined_getter
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:50:7 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:50:25 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:57:24 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:59:26 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:62:17 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:65:16 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:65:41 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:74:15 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:74:36 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:75:15 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:81:30 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:87:24 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:89:15 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:91:15 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:91:42 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:92:15 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:99:30 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:105:24 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:107:15 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:109:15 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:109:35 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:110:15 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:117:50 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:122:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:124:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:129:23 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:130:23 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:133:32 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:139:15 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:147:25 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:147:51 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:148:25 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:158:38 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:160:38 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:165:38 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:172:19 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:177:25 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:177:49 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:178:25 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:188:38 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:190:38 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:195:38 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:204:15 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:206:15 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:206:39 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:207:15 - prefer_const_constructors
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\screens\add_event_screen.dart:209:17 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:212:30 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:222:32 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:223:24 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:225:15 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:230:19 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:230:41 - prefer_const_constructors
+   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\screens\add_event_screen.dart:234:21 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:234:34 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:238:15 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:245:38 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:246:30 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:251:26 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_event_screen.dart:253:28 - prefer_const_constructors
+warning - Unused import: 'dart:io' - lib\screens\add_note_screen.dart:4:8 - unused_import
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_note_screen.dart:128:19 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\add_note_screen.dart:142:55 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\add_note_screen.dart:152:53 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\add_note_screen.dart:158:52 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_note_screen.dart:164:27 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\add_note_screen.dart:180:55 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\add_note_screen.dart:192:69 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\screens\add_note_screen.dart:196:21 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\add_note_screen.dart:199:92 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\add_note_screen.dart:238:63 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\add_note_screen.dart:246:65 - deprecated_member_use
+   info - Constructors for public widgets should have a named 'key' parameter - lib\screens\event_details_screen.dart:9:9 - use_key_in_widget_constructors
+   info - Invalid use of a private type in a public API - lib\screens\event_details_screen.dart:12:3 - library_private_types_in_public_api
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:28:26 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:29:16 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:29:44 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:30:18 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:31:20 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:35:20 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:43:17 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:43:35 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:46:20 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:46:42 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:56:24 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:58:26 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:61:17 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:64:16 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:64:45 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:75:24 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:81:15 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:84:26 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:86:26 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:93:25 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:93:59 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:94:25 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:98:29 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:98:49 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:100:38 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:105:21 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:108:25 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:108:56 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:109:25 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:113:29 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:113:49 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:115:38 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:124:15 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:125:24 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:129:24 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\event_details_screen.dart:139:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\event_details_screen.dart:141:73 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\event_details_screen.dart:152:60 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:168:29 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:169:30 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:171:42 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:172:34 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:179:19 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:183:29 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:184:30 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\event_details_screen.dart:187:34 - prefer_const_constructors
+warning - Unused import: '../providers/user_provider.dart' - lib\screens\event_screen.dart:4:8 - unused_import
+   info - Use 'const' for final variables initialized to a constant value - lib\screens\event_screen.dart:19:7 - prefer_const_declarations
+   info - Use 'const' for final variables initialized to a constant value - lib\screens\event_screen.dart:56:17 - prefer_const_declarations
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\event_screen.dart:65:82 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\event_screen.dart:67:85 - deprecated_member_use
+   info - Use 'const' for final variables initialized to a constant value - lib\screens\event_screen.dart:78:15 - prefer_const_declarations
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\event_screen.dart:125:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\event_screen.dart:141:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\event_screen.dart:174:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\event_screen.dart:184:34 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\event_screen.dart:193:73 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\event_screen.dart:198:40 - deprecated_member_use
+warning - Unused import: '../providers/user_provider.dart' - lib\screens\home_screen.dart:7:8 - unused_import
+   info - Constructors for public widgets should have a named 'key' parameter - lib\screens\home_screen.dart:10:7 - use_key_in_widget_constructors
+   info - Invalid use of a private type in a public API - lib\screens\home_screen.dart:12:3 - library_private_types_in_public_api
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:30:24 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:32:26 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:64:26 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:65:16 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:73:23 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:75:24 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:93:32 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:94:37 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:95:37 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:96:37 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:97:39 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:98:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:101:36 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:102:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:105:37 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:106:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:110:34 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:111:33 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:112:33 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:115:35 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:116:42 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:118:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:121:36 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:122:37 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:136:23 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:138:32 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:153:19 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:163:36 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:168:33 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:183:29 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:185:38 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:191:29 - prefer_const_constructors
+   info - Unnecessary use of 'toList' in a spread - lib\screens\home_screen.dart:192:78 - unnecessary_to_list_in_spreads
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:193:29 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:197:29 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:199:38 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:205:29 - prefer_const_constructors
+   info - Unnecessary use of 'toList' in a spread - lib\screens\home_screen.dart:206:88 - unnecessary_to_list_in_spreads
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:216:13 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:224:19 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:226:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:232:19 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:241:38 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:244:27 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:252:27 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:257:38 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:268:13 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:274:26 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:276:26 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:279:24 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\screens\home_screen.dart:281:29 - prefer_const_literals_to_create_immutables
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:282:21 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:284:30 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:290:21 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:291:21 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\screens\home_screen.dart:294:33 - prefer_const_literals_to_create_immutables
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:295:25 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:296:25 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:297:25 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:298:25 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:299:25 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:300:25 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:301:25 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:309:13 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:314:26 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:315:28 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\screens\home_screen.dart:318:16 - prefer_const_literals_to_create_immutables
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:319:11 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:319:41 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:320:11 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:320:41 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:321:11 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:321:41 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:322:11 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:322:41 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:354:16 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:355:15 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:357:16 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:359:17 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:360:17 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:361:20 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:378:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:384:19 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:388:23 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:410:16 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:411:15 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:413:16 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:417:53 - prefer_const_constructors
+  error - 2 positional arguments expected by 'toggleTaskCompletion', but 1 found - lib\screens\home_screen.dart:427:56 - not_enough_positional_arguments
+   info - 'MaterialStateProperty' is deprecated and shouldn't be used. Use WidgetStateProperty instead. Moved to the Widgets layer to make code available outside of Material. This feature was deprecated after v3.19.0-0.3.pre - lib\screens\home_screen.dart:429:24 - deprecated_member_use
+   info - 'MaterialState' is deprecated and shouldn't be used. Use WidgetState instead. Moved to the Widgets layer to make code available outside of Material. This feature was deprecated after v3.19.0-0.3.pre - lib\screens\home_screen.dart:430:35 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:431:24 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:435:19 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:435:37 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:450:17 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:462:22 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\home_screen.dart:464:55 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:488:16 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:509:16 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:511:16 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:525:11 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:553:20 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\home_screen.dart:557:9 - prefer_const_constructors
+   info - Constructors for public widgets should have a named 'key' parameter - lib\screens\login_screen.dart:7:7 - use_key_in_widget_constructors
+   info - Invalid use of a private type in a public API - lib\screens\login_screen.dart:9:3 - library_private_types_in_public_api
+warning - The value of the field '_isGoogleLoading' isn't used - lib\screens\login_screen.dart:17:8 - unused_field
+warning - The value of the field '_isAppleLoading' isn't used - lib\screens\login_screen.dart:18:8 - unused_field
+   info - Use 'const' with the constructor to improve performance - lib\screens\login_screen.dart:31:20 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\login_screen.dart:43:20 - prefer_const_constructors
+warning - The declaration '_handleGoogleLogin' isn't referenced - lib\screens\login_screen.dart:60:16 - unused_element
+   info - Use 'const' with the constructor to improve performance - lib\screens\login_screen.dart:64:26 - prefer_const_constructors
+   info - Use interpolation to compose strings and values - lib\screens\login_screen.dart:71:13 - prefer_interpolation_to_compose_strings
+   info - Use 'const' with the constructor to improve performance - lib\screens\login_screen.dart:83:20 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\login_screen.dart:84:28 - prefer_const_constructors
+warning - The declaration '_handleAppleLogin' isn't referenced - lib\screens\login_screen.dart:94:16 - unused_element
+   info - Use 'const' with the constructor to improve performance - lib\screens\login_screen.dart:98:26 - prefer_const_constructors
+   info - Use interpolation to compose strings and values - lib\screens\login_screen.dart:105:13 - prefer_interpolation_to_compose_strings
+   info - Use 'const' with the constructor to improve performance - lib\screens\login_screen.dart:117:20 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\login_screen.dart:118:28 - prefer_const_constructors
+   info - Use 'const' for final variables initialized to a constant value - lib\screens\login_screen.dart:131:5 - prefer_const_declarations
+   info - Use 'const' with the constructor to improve performance - lib\screens\login_screen.dart:134:24 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\login_screen.dart:141:17 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\login_screen.dart:148:17 - prefer_const_constructors
+warning - Dead code - lib\screens\login_screen.dart:157:58 - dead_code
+   info - Use 'const' with the constructor to improve performance - lib\screens\login_screen.dart:161:17 - prefer_const_constructors
+warning - Dead code - lib\screens\login_screen.dart:168:62 - dead_code
+warning - Dead code - lib\screens\login_screen.dart:172:62 - dead_code
+   info - Use 'const' with the constructor to improve performance - lib\screens\login_screen.dart:175:45 - prefer_const_constructors
+warning - Dead code - lib\screens\login_screen.dart:175:65 - dead_code
+   info - Use 'const' with the constructor to improve performance - lib\screens\login_screen.dart:180:37 - prefer_const_constructors
+warning - Dead code - lib\screens\login_screen.dart:183:56 - dead_code
+   info - Use 'const' with the constructor to improve performance - lib\screens\login_screen.dart:186:17 - prefer_const_constructors
+warning - Dead code - lib\screens\login_screen.dart:194:62 - dead_code
+warning - Dead code - lib\screens\login_screen.dart:198:62 - dead_code
+   info - Use 'const' with the constructor to improve performance - lib\screens\login_screen.dart:201:45 - prefer_const_constructors
+warning - Dead code - lib\screens\login_screen.dart:201:65 - dead_code
+   info - Use 'const' with the constructor to improve performance - lib\screens\login_screen.dart:206:37 - prefer_const_constructors
+warning - Dead code - lib\screens\login_screen.dart:210:64 - dead_code
+warning - Dead code - lib\screens\login_screen.dart:216:56 - dead_code
+   info - Use 'const' with the constructor to improve performance - lib\screens\login_screen.dart:219:17 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\login_screen.dart:226:40 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\login_screen.dart:228:32 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\login_screen.dart:235:27 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\login_screen.dart:238:36 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\login_screen.dart:239:43 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\login_screen.dart:243:27 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\login_screen.dart:245:36 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\login_screen.dart:253:17 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\login_screen.dart:257:17 - prefer_const_constructors
+warning - The declaration '_SocialButton' isn't referenced - lib\screens\login_screen.dart:267:7 - unused_element
+   info - Use 'const' with the constructor to improve performance - lib\screens\login_screen.dart:292:18 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\login_screen.dart:304:47 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\login_screen.dart:313:17 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\main_dashboard_screen.dart:42:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\main_dashboard_screen.dart:133:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\main_dashboard_screen.dart:143:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\main_dashboard_screen.dart:183:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\main_dashboard_screen.dart:195:53 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\main_dashboard_screen.dart:196:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\main_dashboard_screen.dart:203:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\main_dashboard_screen.dart:227:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\main_dashboard_screen.dart:239:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\note_list_screen.dart:77:82 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\note_list_screen.dart:79:82 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\note_list_screen.dart:123:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\note_list_screen.dart:155:51 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\note_list_screen.dart:164:53 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\note_list_screen.dart:167:52 - deprecated_member_use
+   info - Constructors for public widgets should have a named 'key' parameter - lib\screens\notifications_screen.dart:3:7 - use_key_in_widget_constructors
+   info - Invalid use of a private type in a public API - lib\screens\notifications_screen.dart:5:3 - library_private_types_in_public_api
+   info - Use 'const' with the constructor to improve performance - lib\screens\notifications_screen.dart:12:16 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\notifications_screen.dart:28:16 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\notifications_screen.dart:47:24 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\notifications_screen.dart:49:26 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\notifications_screen.dart:52:17 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\notifications_screen.dart:55:16 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\notifications_screen.dart:55:45 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\notifications_screen.dart:58:18 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\notifications_screen.dart:65:24 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\notifications_screen.dart:67:24 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\notifications_screen.dart:73:30 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\notifications_screen.dart:84:19 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\notifications_screen.dart:91:34 - prefer_const_constructors
+   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\screens\notifications_screen.dart:130:21 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\screens\notifications_screen.dart:130:34 - prefer_const_constructors
+   info - Constructors for public widgets should have a named 'key' parameter - lib\screens\plan_my_day_screen.dart:5:7 - use_key_in_widget_constructors
+   info - Invalid use of a private type in a public API - lib\screens\plan_my_day_screen.dart:7:3 - library_private_types_in_public_api
+   info - Use 'const' with the constructor to improve performance - lib\screens\plan_my_day_screen.dart:14:24 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\plan_my_day_screen.dart:16:26 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\plan_my_day_screen.dart:19:17 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\plan_my_day_screen.dart:22:16 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\plan_my_day_screen.dart:22:43 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\plan_my_day_screen.dart:27:16 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\plan_my_day_screen.dart:34:22 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\plan_my_day_screen.dart:43:27 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\plan_my_day_screen.dart:44:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\plan_my_day_screen.dart:47:32 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\plan_my_day_screen.dart:54:17 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\plan_my_day_screen.dart:59:32 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\plan_my_day_screen.dart:64:27 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\plan_my_day_screen.dart:80:38 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\plan_my_day_screen.dart:82:38 - prefer_const_constructors
+  error - 2 positional arguments expected by 'toggleTaskCompletion', but 1 found - lib\screens\plan_my_day_screen.dart:90:78 - not_enough_positional_arguments
+   info - 'MaterialStateProperty' is deprecated and shouldn't be used. Use WidgetStateProperty instead. Moved to the Widgets layer to make code available outside of Material. This feature was deprecated after v3.19.0-0.3.pre - lib\screens\plan_my_day_screen.dart:92:46 - deprecated_member_use
+   info - 'MaterialState' is deprecated and shouldn't be used. Use WidgetState instead. Moved to the Widgets layer to make code available outside of Material. This feature was deprecated after v3.19.0-0.3.pre - lib\screens\plan_my_day_screen.dart:93:57 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\screens\plan_my_day_screen.dart:94:46 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\plan_my_day_screen.dart:98:41 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\plan_my_day_screen.dart:99:44 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\plan_my_day_screen.dart:103:33 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\plan_my_day_screen.dart:119:39 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\plan_my_day_screen.dart:131:44 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\plan_my_day_screen.dart:141:44 - prefer_const_constructors
+   info - Constructors for public widgets should have a named 'key' parameter - lib\screens\splash_screen.dart:6:7 - use_key_in_widget_constructors
+   info - Invalid use of a private type in a public API - lib\screens\splash_screen.dart:8:3 - library_private_types_in_public_api
+   info - Use 'const' with the constructor to improve performance - lib\screens\splash_screen.dart:16:11 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\splash_screen.dart:29:24 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\splash_screen.dart:34:13 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\splash_screen.dart:36:22 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\screens\splash_screen.dart:38:27 - prefer_const_literals_to_create_immutables
+   info - Use 'const' with the constructor to improve performance - lib\screens\splash_screen.dart:49:19 - prefer_const_constructors
+   info - Constructors for public widgets should have a named 'key' parameter - lib\screens\stats_dashboard_screen.dart:5:7 - use_key_in_widget_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:9:24 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:11:26 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:14:17 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:17:16 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:17:47 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:22:22 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:33:32 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:37:21 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:48:17 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:51:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:53:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:59:23 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:61:32 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:67:23 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:73:36 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:74:38 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:79:27 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:87:45 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:87:75 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:96:17 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:98:17 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:100:26 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:106:17 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:108:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:110:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:113:26 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\screens\stats_dashboard_screen.dart:114:31 - prefer_const_literals_to_create_immutables
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:115:23 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\screens\stats_dashboard_screen.dart:118:35 - prefer_const_literals_to_create_immutables
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:119:27 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:120:27 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:121:27 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:122:27 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:123:27 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:124:27 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:125:27 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:131:17 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:134:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:136:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:142:34 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:147:32 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:149:34 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:152:23 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:156:27 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:158:36 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:201:16 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:203:16 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:210:11 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:219:11 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:247:20 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\stats_dashboard_screen.dart:251:9 - prefer_const_constructors
+warning - Unused import: '../models/user_model.dart' - lib\screens\task_screen.dart:8:8 - unused_import
+warning - Unused import: 'dart:math' - lib\screens\task_screen.dart:9:8 - unused_import
+warning - Unused import: 'dart:io' - lib\screens\task_screen.dart:15:8 - unused_import
+   info - Use 'const' for final variables initialized to a constant value - lib\screens\task_screen.dart:174:5 - prefer_const_declarations
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\task_screen.dart:187:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\task_screen.dart:266:79 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\task_screen.dart:340:78 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\task_screen.dart:356:81 - deprecated_member_use
+   info - Use 'const' for final variables initialized to a constant value - lib\screens\task_screen.dart:466:7 - prefer_const_declarations
+   info - Use 'const' for final variables initialized to a constant value - lib\screens\task_screen.dart:600:5 - prefer_const_declarations
+   info - The variable name 'UIInputBg' isn't a lowerCamelCase identifier - lib\screens\task_screen.dart:639:11 - non_constant_identifier_names
+   info - The variable name 'UIBorder' isn't a lowerCamelCase identifier - lib\screens\task_screen.dart:640:11 - non_constant_identifier_names
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\task_screen.dart:843:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\task_screen.dart:925:48 - deprecated_member_use
+warning - Unused import: '../providers/theme_provider.dart' - lib\screens\user_profile_screen.dart:4:8 - unused_import
+   info - Constructors for public widgets should have a named 'key' parameter - lib\screens\user_profile_screen.dart:6:7 - use_key_in_widget_constructors
+   info - Invalid use of a private type in a public API - lib\screens\user_profile_screen.dart:8:3 - library_private_types_in_public_api
+   info - Use 'const' with the constructor to improve performance - lib\screens\user_profile_screen.dart:15:24 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\user_profile_screen.dart:17:26 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\user_profile_screen.dart:20:17 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\user_profile_screen.dart:23:16 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\user_profile_screen.dart:23:44 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\user_profile_screen.dart:30:20 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\user_profile_screen.dart:31:22 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\user_profile_screen.dart:31:55 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\user_profile_screen.dart:36:22 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\user_profile_screen.dart:45:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\user_profile_screen.dart:51:30 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\user_profile_screen.dart:59:17 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\user_profile_screen.dart:63:26 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\user_profile_screen.dart:69:17 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\user_profile_screen.dart:77:17 - prefer_const_constructors
+   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\screens\user_profile_screen.dart:88:21 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\screens\user_profile_screen.dart:88:34 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\user_profile_screen.dart:106:17 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\user_profile_screen.dart:113:17 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\user_profile_screen.dart:120:17 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\user_profile_screen.dart:131:32 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\user_profile_screen.dart:136:28 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\user_profile_screen.dart:138:30 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\user_profile_screen.dart:172:16 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\user_profile_screen.dart:174:16 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\user_profile_screen.dart:179:29 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\user_profile_screen.dart:180:11 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\user_profile_screen.dart:187:26 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\user_profile_screen.dart:193:17 - prefer_const_constructors
+   info - The imported package 'timezone' isn't a dependency of the importing package - lib\services\notification_service.dart:2:8 - depend_on_referenced_packages
+   info - The imported package 'timezone' isn't a dependency of the importing package - lib\services\notification_service.dart:3:8 - depend_on_referenced_packages
+   info - Don't invoke 'print' in production code - lib\services\notification_service.dart:122:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\notification_service.dart:130:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\notification_service.dart:162:7 - avoid_print
+
