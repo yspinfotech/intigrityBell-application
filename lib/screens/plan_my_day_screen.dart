@@ -18,7 +18,7 @@ class _PlanMyDayScreenState extends State<PlanMyDayScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final userProvider = context.read<UserProvider>();
       if (userProvider.token != null) {
-        context.read<TaskProvider>().fetchTasks(userProvider.token!);
+        context.read<TaskProvider>().fetchTasks(userProvider.token!, currentUserId: userProvider.currentUser?.id);
       }
     });
   }

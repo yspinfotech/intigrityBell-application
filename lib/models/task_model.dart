@@ -16,7 +16,7 @@ class TaskModel {
   final String? assignedTo;
   final String? assignedToName;
   final String status; // 'pending', 'in-progress', 'completed'
-  final String? voiceNotePath;
+  final String? voiceNote;
 
   TaskModel({
     required this.id,
@@ -34,7 +34,7 @@ class TaskModel {
     this.assignedTo,
     this.assignedToName,
     this.status = 'pending',
-    this.voiceNotePath,
+    this.voiceNote,
   });
 
   String get dateString => DateFormat('MMM dd, yyyy').format(scheduledDate);
@@ -67,7 +67,7 @@ class TaskModel {
       assignedTo: (json['assignedTo'] is Map) ? (json['assignedTo']['_id'] ?? '').toString() : json['assignedTo']?.toString(),
       assignedToName: (json['assignedTo'] is Map) ? (json['assignedTo']['name'] ?? '').toString() : null,
       status: (json['status'] ?? (json['isCompleted'] == true ? 'completed' : 'pending')).toString(),
-      voiceNotePath: json['voiceNotePath']?.toString(),
+      voiceNote: json['voiceNote']?.toString(),
     );
   }
 
@@ -80,6 +80,7 @@ class TaskModel {
       'category': category, // Correct field name
       'assignedTo': assignedTo,
       'status': status,
+      'voiceNote': voiceNote,
     };
   }
 }

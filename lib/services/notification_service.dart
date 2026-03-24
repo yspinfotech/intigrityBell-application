@@ -10,7 +10,6 @@ import 'package:android_intent_plus/android_intent.dart';
 import '../models/event_model.dart';
 import '../models/task_model.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
-import 'package:alarm/alarm.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../screens/alarm_ring_screen.dart';
@@ -98,18 +97,24 @@ class NotificationService {
         }
     }
 
-    // FIX STEP 1, 2, 3: Listen to Alarm Ring Stream
-    Alarm.ringStream.stream.listen((alarmSettings) async {
-      debugPrint('⏰ Alarm is ringing from package: ${alarmSettings.id}');
-      
-      // Retrieve the specific sound URI for this alarm instance (saved during scheduling)
-      final prefs = await SharedPreferences.getInstance();
-      final soundUri = prefs.getString('alarm_sound_${alarmSettings.id}') ?? 'default';
-      
-      // Trigger the existing AlarmRingScreen via payload handler
-      final payload = 'alarm|${alarmSettings.id}|$soundUri|${alarmSettings.notificationTitle}';
-      _handleAlarmTrigger(payload);
+    // FEATURE: Listen to Native AlarmManager trigger events
+    _alarmChannel.setMethodCallHandler((call) async {
+      if (call.method == "onAlarmRing") {
+        debugPrint('⏰ Native Alarm is ringing: ${call.arguments}');
+        final Map<dynamic, dynamic> args = call.arguments;
+        final id = args['id'] ?? 0;
+        final title = args['title'] ?? 'Alarm';
+        final soundUri = args['soundUri'] ?? 'default';
+        
+        // Trigger the existing AlarmRingScreen via payload handler
+        final payload = 'alarm|$id|$soundUri|$title';
+        _handleAlarmTrigger(payload);
+      }
+      return null;
     });
+
+    // Check for any alarm that triggered while app was completely closed
+    _checkInitialAlarm();
 
     // Create the alarm channel explicitly for Android to enforce highest priority with sound
     if (Platform.isAndroid) {
@@ -148,9 +153,46 @@ class NotificationService {
     await checkAndRequestPermissions();
 
     debugPrint('✅ Local Notifications initialized');
-
     _isInitialized = true;
-    debugPrint('✅ Notification Service fully initialized');
+  }
+
+  Future<void> _checkInitialAlarm() async {
+    try {
+      final initialAlarm = await _alarmChannel.invokeMethod('getInitialAlarm');
+      if (initialAlarm != null) {
+        debugPrint('⏰ Initial Alarm detected: $initialAlarm');
+        final id = initialAlarm['id'] ?? 0;
+        final title = initialAlarm['title'] ?? 'Alarm';
+        final soundUri = initialAlarm['soundUri'] ?? 'default';
+        _handleAlarmTrigger('alarm|$id|$soundUri|$title');
+      }
+    } catch (e) {
+      debugPrint('Error checking initial alarm: $e');
+    }
+  }
+  
+  /// Check and request battery optimization ignoring
+  Future<void> checkBatteryOptimizations() async {
+    if (Platform.isAndroid) {
+      final status = await Permission.ignoreBatteryOptimizations.status;
+      debugPrint('🔋 Battery optimization status: $status');
+      
+      if (status.isDenied || status.isLimited) {
+        // We will show a guide or trigger the intent
+        debugPrint('⚠️ Battery optimizations are ACTIVE. Alarms might be delayed.');
+      }
+    }
+  }
+
+  /// Open battery optimization settings
+  Future<void> requestIgnoreBatteryOptimizations() async {
+    if (Platform.isAndroid) {
+      final intent = AndroidIntent(
+        action: 'android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS',
+        data: 'package:com.example.intigrity',
+      );
+      await intent.launch();
+    }
   }
 
   /// Request permissions based on Android version
@@ -235,7 +277,7 @@ class NotificationService {
     }
   }
 
-  static const _alarmChannel = MethodChannel('com.example.intigrity/alarm');
+  static const _alarmChannel = MethodChannel('alarm_channel');
 
   void _handleAlarmTrigger(String payload) {
     try {
@@ -315,16 +357,14 @@ class NotificationService {
       
       // === STRICT ORDER: Audio → Alarm → Notification → Vibration ===
       
-      // 1. Stop native AlarmService (audio + foreground notification)
+      // 3. Stop native AlarmService (audio + foreground notification)
       await _alarmChannel.invokeMethod('stopAlarmService');
       
-      // 2. Stop Flutter audio player
+      // 4. Cancel native AlarmManager exact alarm
+      await _alarmChannel.invokeMethod('cancelAlarm', {'id': id});
+      
+      // 5. Final cleanup of local state and notifications
       await _audioPlayer.stop();
-      
-      // 3. Stop Alarm package (this should kill its internal vibration loop)
-      await Alarm.stop(id);
-      
-      // 4. Cancel the notification (THIS IS CRITICAL - notification channel drives system vibration)
       await _notificationsPlugin.cancel(id);
       await _notificationsPlugin.cancelAll(); // Nuclear option: kill ALL lingering notifications
       
@@ -349,39 +389,71 @@ class NotificationService {
   /// Get information about scheduled notifications
   int get scheduledNotificationCount => _scheduledNotifications.length;
 
-  tz.TZDateTime _nextInstanceOfAlarm(int hour, int minute, [int? weekday]) {
-    final DateTime now = DateTime.now();
+  tz.TZDateTime _nextInstanceOfAlarm(int hour, int minute, int reminderMinutes, [int? weekday, DateTime? baseDate]) {
+    final DateTime now = baseDate ?? DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
     
-    // FIX 1: Force exact time (seconds = 0)
-    DateTime dateTime = DateTime(
+    // FIX 1: USE DIRECT TZDateTime (CRITICAL)
+    tz.TZDateTime scheduledTime = tz.TZDateTime(
+      tz.local,
       now.year,
       now.month,
       now.day,
       hour,
       minute,
-      0, // MUST be 0
+      0,
     );
 
-    // FIX 2: Use TZDateTime properly (conversion source)
-    tz.TZDateTime scheduledTime = tz.TZDateTime.from(dateTime, tz.local);
+    // FEATURE 2: Calculate reminder time
+    if (reminderMinutes > 0) {
+      scheduledTime = scheduledTime.subtract(Duration(minutes: reminderMinutes));
+    }
 
-    // FIX 3: Ensure future time (No past scheduling)
+    // FEATURE 3: ENSURE EXACT ZERO SECOND (REMOVED -500MS OFFSET)
+    scheduledTime = tz.TZDateTime(
+      tz.local,
+      scheduledTime.year,
+      scheduledTime.month,
+      scheduledTime.day,
+      scheduledTime.hour,
+      scheduledTime.minute,
+      0, // EXACT ZERO SECOND
+      0, // EXACT ZERO MILLISECOND
+    );
+ 
+    // FIX 5: ENSURE FUTURE TIME ONLY
     if (scheduledTime.isBefore(tz.TZDateTime.now(tz.local))) {
       scheduledTime = scheduledTime.add(const Duration(days: 1));
     }
-
-    // FIX 7: DEBUG LOGS
-    print("Selected Time: $dateTime");
-    print("Scheduled Time: $scheduledTime");
-
+ 
     if (weekday != null) {
       while (scheduledTime.weekday != weekday) {
         scheduledTime = scheduledTime.add(const Duration(days: 1));
       }
     }
 
-    debugPrint('🕒 Next instance calculated: $scheduledTime (Day: ${scheduledTime.weekday})');
+    debugPrint('🕒 Alarm instance calculated: $scheduledTime (Reminder: $reminderMinutes mins)');
     return scheduledTime;
+  }
+
+  /// Cancel all alarms associated with an event
+  Future<void> cancelEventNotifications(Event event) async {
+    final int baseId = event.notificationId ?? (event.id.hashCode % 100000000).abs();
+    
+    // Cancel the base alarms and all possible reminder offsets (we support up to 10 reminders)
+    // If it's a repeating event, we also need to cancel day offsets
+    if (event.isRepeating && event.repeatDays.isNotEmpty) {
+      for (int day in event.repeatDays) {
+        final int dayBaseId = baseId + (day * 100); 
+        for (int i = 0; i < 10; i++) {
+          await cancelNotification(dayBaseId + i);
+        }
+      }
+    } else {
+      for (int i = 0; i < 10; i++) {
+        await cancelNotification(baseId + i);
+      }
+    }
+    debugPrint('🗑️ All reminders cancelled for event: ${event.title}');
   }
 
 
@@ -397,119 +469,82 @@ class NotificationService {
       final int minute = event.startTime?.minute ?? 0;
       final int baseId = event.notificationId ?? (event.id.hashCode % 100000000).abs();
 
+      // FEATURE 1: Support MULTIPLE reminders
+      final List<int> reminders = event.reminders.isNotEmpty ? event.reminders : [0]; // Default to on-time if empty
+
       if (event.isRepeating && event.repeatDays.isNotEmpty) {
         // Schedule for each selected day
         for (int day in event.repeatDays) {
-          final scheduledTime = _nextInstanceOfAlarm(hour, minute, day);
-          final dailyId = baseId + day; // Unique ID for each weekday instance
+          final int dayBaseId = baseId + (day * 100); // Unique base for each day
           
-          await _scheduleEventAtTime(event, scheduledTime, dailyId, isRepeat: true);
-          scheduledIds.add(dailyId);
+          for (int i = 0; i < reminders.length; i++) {
+            final int reminderMinutes = reminders[i];
+            final scheduledTime = _nextInstanceOfAlarm(hour, minute, reminderMinutes, day);
+            final reminderId = dayBaseId + i;
+            
+            await _scheduleEventAtTime(event, scheduledTime, reminderId, isRepeat: true);
+            scheduledIds.add(reminderId);
+          }
         }
-      } else if (event.isRepeating) {
-        // Default repeat (weekly on the event's original weekday)
-        final scheduledTime = _nextInstanceOfAlarm(hour, minute, event.date.weekday);
-        await _scheduleEventAtTime(event, scheduledTime, baseId, isRepeat: true);
-        scheduledIds.add(baseId);
       } else {
-        // FIX 1: Force exact time (seconds = 0)
-        DateTime dateTime = DateTime(
-          event.date.year,
-          event.date.month,
-          event.date.day,
-          hour,
-          minute,
-          0, // MUST be 0
-        );
-
-        // FIX 2: Use TZDateTime properly (conversion source)
-        tz.TZDateTime scheduledTime = tz.TZDateTime.from(dateTime, tz.local);
-
-        // FIX 3: Ensure future time
-        if (scheduledTime.isBefore(tz.TZDateTime.now(tz.local))) {
-          scheduledTime = scheduledTime.add(const Duration(days: 1));
-        }
-        
-        // FIX 7: DEBUG LOGS
-        print("Selected Time: $dateTime");
-        print("Scheduled Time: $scheduledTime");
-
-        await _scheduleEventAtTime(event, scheduledTime, baseId, isRepeat: false);
-        scheduledIds.add(baseId);
-      }
-
-      // Reminder Notification (similarly handled if needed, but for simplicity we keep it as is or slightly improved)
-      if (event.reminderTime != null && event.reminderTime! > 0) {
-        // Basic reminder logic - usually for non-repeating or standard first instance
-        final mainTime = event.isRepeating 
-          ? _nextInstanceOfAlarm(hour, minute, event.repeatDays.isNotEmpty ? event.repeatDays.first : event.date.weekday)
-          : DateTime(event.date.year, event.date.month, event.date.day, hour, minute, 0);
-          
-        final reminderTime = mainTime.subtract(Duration(minutes: event.reminderTime!));
-        
-        if (reminderTime.isAfter(DateTime.now())) {
-          final reminderId = baseId + 100; // Unique offset for reminder
-          
-          await _schedule(
-            id: reminderId,
-            title: '⏰ Reminder: ${event.title}',
-            body: 'Starts in ${event.reminderTime} minutes',
-            scheduledDate: reminderTime,
-            channelId: 'reminder_channel',
-            channelName: 'Event Reminders',
-            sound: event.sound,
-            matchDateTimeComponents: event.isRepeating ? DateTimeComponents.dayOfWeekAndTime : null,
+        // Non-repeating event
+        for (int i = 0; i < reminders.length; i++) {
+          final int reminderMinutes = reminders[i];
+          final scheduledTime = _nextInstanceOfAlarm(
+            hour, 
+            minute, 
+            reminderMinutes, 
+            null, 
+            DateTime(event.date.year, event.date.month, event.date.day)
           );
+          final reminderId = baseId + i;
           
+          await _scheduleEventAtTime(event, scheduledTime, reminderId, isRepeat: false);
           scheduledIds.add(reminderId);
         }
       }
+
+      print("📅 Total Alarms Scheduled for ${event.title}: ${scheduledIds.length}");
+      return scheduledIds;
     } catch (e) {
-      debugPrint('❌ Error scheduling event notification: $e');
+      debugPrint('❌ Error scheduling event notifications: $e');
+      return [];
     }
-    
-    return scheduledIds;
   }
 
   /// Helper to schedule the actual event notification
   Future<void> _scheduleEventAtTime(Event event, tz.TZDateTime time, int id, {bool isRepeat = false}) async {
-    // 1. Immediately Prep Sound Info (No async gap for Alarm package)
+    // FIX 4: REMOVE EXTRA DELAY (No Future.delayed here)
+    // FIX 5: ENSURE EXACT TRIGGER (androidAllowWhileIdle: true / AndroidScheduleMode.exactAllowWhileIdle)
+    // FIX 6: VERIFY TIME PICKER VALUE (Direct mapping used: event.startTime.hour/minute)
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('alarm_sound_$id', event.sound);
     
-    // 2. Convert to CLEAN local DateTime for alarm package (no TZ artifacts)
+    // 2. Convert to CLEAN local DateTime for absolute parity
     final DateTime cleanTime = DateTime(
       time.year,
       time.month,
       time.day,
       time.hour,
       time.minute,
-      0, // FORCE seconds = 0
-      0, // FORCE milliseconds = 0
+      0, // EXACT ZERO SECOND
+      0, // EXACT ZERO MILLISECOND
     );
     
-    // 3. FIX STEP 2 & 3: Use Alarm Package
-    final alarmSettings = AlarmSettings(
-      id: id,
-      dateTime: cleanTime, // USE CLEAN TIME — no timezone conversion artifacts
-      assetAudioPath: 'assets/alarm.mp3',
-      loopAudio: true,
-      vibrate: false,
-      volume: 1.0,
-      fadeDuration: 0,
-      notificationTitle: event.title,
-      notificationBody: 'Alarm is ringing — tap to open',
-      enableNotificationOnKill: true,
-    );
-
     // FIX 7: DEBUG LOGS
     print("⏰ Alarm ID: $id");
     print("⏰ Original Scheduled Time: $time");
     print("⏰ Clean Playback Time: $cleanTime");
-    print("⏰ Activating: ${event.title}");
-
+    print("⏰ Activating Native Alarm: ${event.title} at $time (ID: $id)");
+    
     try {
-      await Alarm.set(alarmSettings: alarmSettings);
+      // FEATURE 2 & 3: Use Native AlarmManager for absolute precision
+      await _alarmChannel.invokeMethod('setAlarm', {
+        'alarmId': id,
+        'triggerTime': cleanTime.millisecondsSinceEpoch,
+        'title': event.title,
+        'soundUri': event.sound,
+      });
 
       _scheduledNotifications[id] = {
         'title': event.title,
@@ -518,52 +553,64 @@ class NotificationService {
         'eventId': event.id,
       };
       
-      debugPrint('✅ Alarm package scheduled: ${event.title} at $time (ID: $id, Repeat: $isRepeat)');
+      debugPrint('✅ Native AlarmManager scheduled: ${event.title} at $time (ID: $id, Repeat: $isRepeat)');
     } catch (e) {
-      debugPrint('❌ Error scheduling Alarm package: $e');
+      debugPrint('❌ Error scheduling Native Alarm: $e');
     }
   }
 
-  /// Schedule a notification for a task (with 15 minute default reminder)
-  /// 
-  /// Tasks are reminded 15 minutes before the scheduled time
-  /// 
-  /// Returns the notification ID that was scheduled (or -1 if not scheduled)
-  Future<int> scheduleTaskNotification(TaskModel task) async {
+  /// Schedule multiple reminders for a task (15, 10, 5, and 0 minutes before)
+  Future<void> scheduleTaskReminders(TaskModel task) async {
     if (!_isInitialized) await initialize();
 
     try {
       final scheduledDate = task.scheduledDate;
-      final notificationTime = scheduledDate.subtract(const Duration(minutes: 15));
+      final int baseId = (task.id.hashCode % 10000000).abs();
+      
+      // FIX 6-7: 15, 10, 5, and 0 minutes before reminders
+      final List<int> reminderOffsets = [15, 10, 5, 0];
+      
+      print("📅 Scheduling multiple alarms for Task: ${task.title} (Assigned To: ${task.assignedTo})");
 
-      if (notificationTime.isAfter(DateTime.now())) {
-        final id = (task.id.hashCode % 100000000).abs();
+      for (int i = 0; i < reminderOffsets.length; i++) {
+        final int offset = reminderOffsets[i];
+        final DateTime alarmTime = scheduledDate.subtract(Duration(minutes: offset));
         
-        await _schedule(
-          id: id,
-          title: '📋 Task Reminder: ${task.title}',
-          body: task.description.isNotEmpty ? 
-            task.description : 'Your task is due soon',
-          scheduledDate: notificationTime,
-          channelId: 'task_channel',
-          channelName: 'Task Notifications',
-        );
-        
-        _scheduledNotifications[id] = {
-          'title': task.title,
-          'type': 'task',
-          'scheduledFor': notificationTime,
-          'taskId': task.id,
-        };
-        
-        debugPrint('✅ Task notification scheduled for ${task.title}');
-        return id;
+        if (alarmTime.isAfter(DateTime.now())) {
+          // FIX 8: Unique IDs using baseId + index
+          final int uniqueId = baseId + i + 5000; // Offset by 5000 to avoid clash with events
+          
+          // FIX 11: DEBUG LOGS
+          print("Task assigned to: ${task.assignedTo}");
+          print("Reminder scheduled at: $alarmTime (ID: $uniqueId)");
+
+          // Use the high-precision Native Alarm bridge
+          await _alarmChannel.invokeMethod('setAlarm', {
+            'alarmId': uniqueId,
+            'triggerTime': alarmTime.millisecondsSinceEpoch,
+            'title': '📋 ${offset == 0 ? 'DUE NOW' : '$offset min before'}: ${task.title}',
+            'soundUri': 'assets/alarm.mp3', // Default task alarm sound
+          });
+
+          _scheduledNotifications[uniqueId] = {
+            'title': task.title,
+            'type': 'task',
+            'scheduledFor': alarmTime,
+            'taskId': task.id,
+          };
+        }
       }
+      
+      debugPrint('✅ Multiple task reminders scheduled for ${task.title}');
     } catch (e) {
-      debugPrint('❌ Error scheduling task notification: $e');
+      debugPrint('❌ Error scheduling task reminders: $e');
     }
-    
-    return -1;
+  }
+
+  /// Deprecated: kept for backward compatibility if any old code calls it
+  Future<int> scheduleTaskNotification(TaskModel task) async {
+    await scheduleTaskReminders(task);
+    return (task.id.hashCode % 100000000).abs();
   }
 
   /// Internal method to schedule a notification with exact timing
@@ -591,8 +638,34 @@ class NotificationService {
     DateTimeComponents? matchDateTimeComponents,
   }) async {
     try {
-      // Convert to timezone-aware DateTime for exact scheduling
-      final tzDateTime = tz.TZDateTime.from(scheduledDate, tz.local);
+      // FIX 1: USE DIRECT TZDateTime (CRITICAL)
+      final scheduledTime = tz.TZDateTime(
+        tz.local,
+        scheduledDate.year,
+        scheduledDate.month,
+        scheduledDate.day,
+        scheduledDate.hour,
+        scheduledDate.minute,
+        0,
+      );
+      
+      // FIX 3: ENSURE EXACT HH:mm:00.000
+      tz.TZDateTime tzDateTime = tz.TZDateTime(
+        tz.local,
+        scheduledTime.year,
+        scheduledTime.month,
+        scheduledTime.day,
+        scheduledTime.hour,
+        scheduledTime.minute,
+        0,
+        0,
+      );
+      
+      // FIX 5: ENSURE FUTURE TIME ONLY
+      if (tzDateTime.isBefore(tz.TZDateTime.now(tz.local))) {
+        tzDateTime = tzDateTime.add(const Duration(days: 1));
+      }
+      
       final String payload = 'alarm|$id|${sound ?? 'default'}|$title';
 
       await _notificationsPlugin.zonedSchedule(
@@ -646,14 +719,14 @@ class NotificationService {
   /// @param id: The base notification ID to cancel
   Future<void> cancelNotification(int id) async {
     try {
-      // FIX STEP 8: Cancel via Alarm package
-      await Alarm.stop(id);
+      // FIX STEP 8: Cancel via Native Alarm Bridge
+      await _alarmChannel.invokeMethod('cancelAlarm', {'alarmId': id});
       await _notificationsPlugin.cancel(id);
       debugPrint('✅ Base notification/alarm cancelled: ID=$id');
       
       // Cancel possible weekday instances (1-7)
       for (int i = 1; i <= 7; i++) {
-        await Alarm.stop(id + i);
+        await _alarmChannel.invokeMethod('cancelAlarm', {'alarmId': id + i});
         await _notificationsPlugin.cancel(id + i);
       }
       

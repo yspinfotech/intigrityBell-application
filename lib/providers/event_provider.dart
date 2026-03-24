@@ -89,7 +89,7 @@ class EventProvider extends ChangeNotifier {
         // Cancel old system notifications before removal
         for (var e in _events) {
           if (e.type != 'local') {
-            _notificationService.cancelNotification(e.notificationId ?? (e.date.millisecondsSinceEpoch ~/ 1000).toInt());
+            _notificationService.cancelEventNotifications(e);
           }
         }
         
@@ -124,11 +124,11 @@ class EventProvider extends ChangeNotifier {
         type: event.type,
         createdBy: event.createdBy,
         category: event.category,
-        reminderTime: event.reminderTime,
+        reminders: event.reminders,
         sound: event.sound,
         isRepeating: event.isRepeating,
         repeatDays: event.repeatDays,
-        notificationId: (DateTime.now().millisecondsSinceEpoch ~/ 1000).toInt(),
+        notificationId: (DateTime.now().millisecondsSinceEpoch ~/ 1000).toSigned(31).toInt(),
       );
     }
     
@@ -143,7 +143,7 @@ class EventProvider extends ChangeNotifier {
     if (index != -1) {
       final oldEvent = _events[index];
       // FIX 6: Cancel old alarm before update
-      _notificationService.cancelNotification(oldEvent.notificationId ?? (oldEvent.date.millisecondsSinceEpoch ~/ 1000).toInt());
+      _notificationService.cancelEventNotifications(oldEvent);
       _events[index] = event;
       if (event.type == 'local') _saveLocalEvents();
       _notificationService.scheduleEventNotification(event);
@@ -155,7 +155,7 @@ class EventProvider extends ChangeNotifier {
     final index = _events.indexWhere((e) => e.id == eventId);
     if (index != -1) {
       final eventToDelete = _events[index];
-      _notificationService.cancelNotification(eventToDelete.notificationId ?? (eventToDelete.date.millisecondsSinceEpoch ~/ 1000).toInt());
+      _notificationService.cancelEventNotifications(eventToDelete);
       _events.removeAt(index);
       if (eventToDelete.type == 'local') _saveLocalEvents();
       notifyListeners();

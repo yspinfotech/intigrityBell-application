@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -40,7 +41,7 @@ class _TaskScreenState extends State<TaskScreen> {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       final taskProvider = Provider.of<TaskProvider>(context, listen: false);
       if (userProvider.token != null) {
-        taskProvider.fetchTasks(userProvider.token!);
+        taskProvider.fetchTasks(userProvider.token!, currentUserId: userProvider.currentUser?.id);
       }
     });
   }
@@ -118,6 +119,7 @@ class TaskCard extends StatefulWidget {
 class _TaskCardState extends State<TaskCard> {
   final AudioPlayer _audioPlayer = AudioPlayer();
   bool _isPlaying = false;
+  bool _isExpanded = false; // Expanding logic
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
 
@@ -156,7 +158,21 @@ class _TaskCardState extends State<TaskCard> {
     if (_isPlaying) {
       await _audioPlayer.pause();
     } else {
-      await _audioPlayer.play(DeviceFileSource(widget.task.voiceNotePath!));
+      if (widget.task.voiceNote == null) return;
+      print("Voice note path: ${widget.task.voiceNote}");
+      
+      if (widget.task.voiceNote!.startsWith('data:audio')) {
+        final base64String = widget.task.voiceNote!.split(',').last;
+        final bytes = base64Decode(base64String);
+        final tempDir = await getTemporaryDirectory();
+        final tempPath = '${tempDir.path}/temp_voice_note_${widget.task.id}.m4a';
+        await File(tempPath).writeAsBytes(bytes);
+        await _audioPlayer.play(DeviceFileSource(tempPath));
+      } else if (widget.task.voiceNote!.startsWith('http')) {
+        await _audioPlayer.play(UrlSource(widget.task.voiceNote!));
+      } else {
+        await _audioPlayer.play(DeviceFileSource(widget.task.voiceNote!));
+      }
     }
   }
 
@@ -210,19 +226,29 @@ class _TaskCardState extends State<TaskCard> {
         child: InkWell(
           borderRadius: BorderRadius.circular(20),
           onTap: () {
-            taskProvider.toggleTaskCompletion(widget.task.id, token);
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (context) => AddTaskModal(existingTask: widget.task),
+            );
           },
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  margin: const EdgeInsets.only(top: 2, right: 12),
-                  child: Icon(
-                    widget.task.isCompleted ? Icons.check_circle : Icons.radio_button_unchecked,
-                    color: widget.task.isCompleted ? const Color(0xFF2ECC71) : subtitleColor,
-                    size: 24,
+                GestureDetector(
+                  onTap: () {
+                    taskProvider.toggleTaskCompletion(widget.task.id, token);
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(top: 2, right: 12),
+                    child: Icon(
+                      widget.task.isCompleted ? Icons.check_circle : Icons.radio_button_unchecked,
+                      color: widget.task.isCompleted ? const Color(0xFF2ECC71) : subtitleColor,
+                      size: 24,
+                    ),
                   ),
                 ),
                 Expanded(
@@ -265,14 +291,14 @@ class _TaskCardState extends State<TaskCard> {
                       if (widget.task.description.isNotEmpty) ...[
                         Text(
                           widget.task.description,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                          maxLines: _isExpanded ? null : 2,
+                          overflow: _isExpanded ? null : TextOverflow.ellipsis,
                           style: TextStyle(color: subtitleColor, fontSize: 14),
                         ),
                         const SizedBox(height: 10),
                       ],
                       // Voice Note Playback Full UI inside card
-                      if (widget.task.voiceNotePath != null) ...[
+                      if (widget.task.voiceNote != null) ...[
                         Container(
                           margin: const EdgeInsets.only(bottom: 10),
                           padding: const EdgeInsets.only(left: 4, right: 12, top: 4, bottom: 4),
@@ -338,9 +364,12 @@ class _TaskCardState extends State<TaskCard> {
                           if (widget.task.assignedTo != null) ...[
                             Icon(Icons.person_outline, color: subtitleColor, size: 14),
                             const SizedBox(width: 4),
-                            Text(
-                              'To: ${widget.task.assignedToName ?? widget.task.assignedTo ?? 'Unknown'}',
-                               style: TextStyle(color: subtitleColor, fontSize: 12),
+                            Expanded(
+                              child: Text(
+                                'To: ${widget.task.assignedToName ?? widget.task.assignedTo ?? 'Unknown'}',
+                                 style: TextStyle(color: subtitleColor, fontSize: 12),
+                                 overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ],
                         ],
@@ -461,9 +490,9 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
       _selectedDate = task.scheduledDate;
       _selectedPriority = task.priority;
       _selectedCategoryId = task.category;
-      _recordedFilePath = task.voiceNotePath;
+      _recordedFilePath = task.voiceNote;
 
-      if (_recordedFilePath != null) {
+      if (_recordedFilePath != null && !_recordedFilePath!.startsWith('data:')) {
         _previewPlayer.setSourceDeviceFile(_recordedFilePath!);
       }
     }
@@ -481,7 +510,7 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
 
   String? _selectedAssignedToId;
   String? _selectedCategoryId;
-  DateTime _selectedDate = DateTime.now();
+  DateTime _selectedDate = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
   String _selectedPriority = 'Medium';
 
   @override
@@ -507,10 +536,11 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
   }
 
   void _presentDateTimePicker() async {
+    final DateTime today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
     final pickedDate = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
-      firstDate: DateTime.now(),
+      firstDate: today,
       lastDate: DateTime(2030),
     );
 
@@ -531,6 +561,7 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
         pickedDate.day,
         pickedTime.hour,
         pickedTime.minute,
+        0, // Force ZERO seconds (CRITICAL)
       );
     });
   }
@@ -579,10 +610,21 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
       await _previewPlayer.pause();
     } else {
       if (_recordedFilePath != null) {
-        if (_previewPosition == _previewDuration && _previewDuration > Duration.zero) {
-          await _previewPlayer.seek(Duration.zero);
+        if (_recordedFilePath!.startsWith('data:audio')) {
+          final base64String = _recordedFilePath!.split(',').last;
+          final bytes = base64Decode(base64String);
+          final tempDir = await getTemporaryDirectory();
+          final tempPath = '${tempDir.path}/temp_preview_${DateTime.now().millisecondsSinceEpoch}.m4a';
+          await File(tempPath).writeAsBytes(bytes);
+          await _previewPlayer.play(DeviceFileSource(tempPath));
+        } else if (_recordedFilePath!.startsWith('http')) {
+          await _previewPlayer.play(UrlSource(_recordedFilePath!));
+        } else {
+          if (_previewPosition == _previewDuration && _previewDuration > Duration.zero) {
+            await _previewPlayer.seek(Duration.zero);
+          }
+          await _previewPlayer.play(DeviceFileSource(_recordedFilePath!));
         }
-        await _previewPlayer.play(DeviceFileSource(_recordedFilePath!));
       }
     }
   }
@@ -598,7 +640,7 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
     });
   }
 
-  void _submitData() {
+  void _submitData() async {
     if (_titleController.text.trim().isEmpty) {
       _showErrorSnackBar('Title is mandatory');
       return;
@@ -618,6 +660,17 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
     final taskProvider = Provider.of<TaskProvider>(context, listen: false);
     final token = userProvider.token ?? '';
 
+    String? finalVoiceNote = _recordedFilePath;
+    if (_recordedFilePath != null && !_recordedFilePath!.startsWith('http') && !_recordedFilePath!.startsWith('data:')) {
+      try {
+        final bytes = await File(_recordedFilePath!).readAsBytes();
+        final base64String = base64Encode(bytes);
+        finalVoiceNote = 'data:audio/m4a;base64,$base64String';
+      } catch (e) {
+        print("Error encoding audio: $e");
+      }
+    }
+
     final newTask = TaskModel(
       id: widget.existingTask?.id ?? '',
       title: _titleController.text.trim(),
@@ -628,7 +681,7 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
       category: _selectedCategoryId ?? '', // Should be the ID
       assignedBy: userProvider.currentUser?.id,
       assignedTo: _selectedAssignedToId,
-      voiceNotePath: _recordedFilePath,
+      voiceNote: finalVoiceNote,
     );
 
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/task_model.dart';
 import '../services/api_service.dart';
+import '../services/notification_service.dart';
 import 'dart:convert';
 
 class TaskProvider extends ChangeNotifier {
@@ -21,7 +22,7 @@ class TaskProvider extends ChangeNotifier {
     return (completedCount / _tasks.length) * 100;
   }
 
-  Future<void> fetchTasks(String token) async {
+  Future<void> fetchTasks(String token, {String? currentUserId}) async {
     _isLoading = true;
     notifyListeners();
     try {
@@ -31,6 +32,15 @@ class TaskProvider extends ChangeNotifier {
         if (body['success'] == true) {
           final List<dynamic> data = body['data'];
           _tasks = data.map((item) => TaskModel.fromJson(item)).toList();
+          
+          // Re-schedule alarms cleanly for any unfinished tasks assigned to this user
+          if (currentUserId != null) {
+            for (var task in _tasks) {
+              if (!task.isCompleted && task.assignedTo == currentUserId) {
+                NotificationService().scheduleTaskReminders(task);
+              }
+            }
+          }
         }
       }
     } catch (e) {
@@ -52,6 +62,7 @@ class TaskProvider extends ChangeNotifier {
           'dueDate': task.scheduledDate.toIso8601String(),
           'priority': task.priority.toLowerCase(),
           'category': task.category,
+          'voiceNote': task.voiceNote, // Changed from voiceNotePath
         },
         token: token
       );
@@ -60,6 +71,10 @@ class TaskProvider extends ChangeNotifier {
         if (body['success'] == true) {
           final newTask = TaskModel.fromJson(body['data']);
           _tasks.add(newTask);
+          
+          // FIX 6-10: Schedule multiple task reminders
+          NotificationService().scheduleTaskReminders(newTask);
+          
           notifyListeners();
         }
       }
@@ -72,7 +87,7 @@ class TaskProvider extends ChangeNotifier {
     try {
       final response = await ApiService.put(
         '/tasks/${task.id}',
-        task.toJson(),
+        task.toJson(), // toJson already includes major fields, but let's check it
         token: token
       );
       if (response.statusCode == 200) {
@@ -82,6 +97,10 @@ class TaskProvider extends ChangeNotifier {
           final index = _tasks.indexWhere((t) => t.id == updatedTask.id);
           if (index != -1) {
             _tasks[index] = updatedTask;
+            
+            // FIX 6-10: Update scheduled reminders
+            NotificationService().scheduleTaskReminders(updatedTask);
+            
             notifyListeners();
           }
         }

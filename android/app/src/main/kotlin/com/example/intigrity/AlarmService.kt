@@ -50,8 +50,11 @@ class AlarmService : Service() {
 
         // 1. Start MediaPlayer
         startAudio(soundUriStr)
+ 
+        // 2. Start Vibration (Professional Repeating Pattern)
+        startVibration()
 
-        // 2. Create FullScreen Intent to launch MainActivity
+        // 3. Create FullScreen Intent to launch MainActivity
         val fullScreenIntent = Intent(this, MainActivity::class.java).apply {
             setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
             putExtra("trigger_alarm", true)
@@ -63,7 +66,7 @@ class AlarmService : Service() {
             this, id, fullScreenIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // 3. Create Stop Action
+        // 4. Create Stop Action
         val stopIntent = Intent(this, AlarmService::class.java).apply {
             action = "STOP_ALARM"
         }
@@ -71,15 +74,17 @@ class AlarmService : Service() {
             this, id + 1000, stopIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // 4. Build Notification
+        // 5. Build Notification
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setContentTitle("⏰ $title")
             .setContentText("Alarm is ringing — tap to open or press STOP")
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
-            .setFullScreenIntent(fullScreenPendingIntent, true)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC) // Make it visible on lock screen
+            .setFullScreenIntent(fullScreenPendingIntent, true) // Force full screen Activity
             .setOngoing(true)
+            .setAutoCancel(false)
             .addAction(0, "STOP ALARM", stopPendingIntent)
             .build()
 
@@ -174,6 +179,25 @@ class AlarmService : Service() {
         mediaPlayer = null
     }
 
+    private fun startVibration() {
+        try {
+            val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            // Pattern: 0ms delay, 500ms ON, 500ms OFF, repeat from index 0
+            val pattern = longArrayOf(0, 500, 500)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                // For modern Android, use VibrationEffect
+                vibrator.vibrate(
+                    android.os.VibrationEffect.createWaveform(pattern, 0)
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                vibrator.vibrate(pattern, 0)
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("AlarmService", "Error starting vibration: ${e.message}")
+        }
+    }
+ 
     private fun stopVibration() {
         try {
             val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator

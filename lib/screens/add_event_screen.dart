@@ -18,12 +18,12 @@ class _AddEventScreenState extends State<AddEventScreen> {
   static const platform = MethodChannel('com.example.intigrity/ringtone');
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  DateTime _selectedDate = DateTime.now();
+  DateTime _selectedDate = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
   TimeOfDay _startTime = TimeOfDay.now();
   TimeOfDay _endTime = TimeOfDay.now().replacing(hour: TimeOfDay.now().hour + 1);
   bool _isRepeating = false;
   List<int> _selectedRepeatDays = [];
-  String? _selectedReminder;
+  List<int> _selectedReminders = []; // Changed to List
   String _selectedSound = 'default';
 
   final List<String> _weekDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
@@ -39,25 +39,25 @@ class _AddEventScreenState extends State<AddEventScreen> {
       _endTime = widget.existingEvent!.endTime ?? TimeOfDay.now().replacing(hour: TimeOfDay.now().hour + 1);
       _isRepeating = widget.existingEvent!.isRepeating;
       _selectedRepeatDays = List<int>.from(widget.existingEvent!.repeatDays);
-      
-      if (widget.existingEvent!.reminderTime != null) {
-        if (widget.existingEvent!.reminderTime == 15) _selectedReminder = '15 mins before';
-        else if (widget.existingEvent!.reminderTime == 30) _selectedReminder = '30 mins before';
-        else if (widget.existingEvent!.reminderTime == 60) _selectedReminder = '1 hour before';
-        else if (widget.existingEvent!.reminderTime == 0) _selectedReminder = 'On time';
-      }
+      _selectedReminders = List<int>.from(widget.existingEvent!.reminders);
       _selectedSound = widget.existingEvent!.sound;
     }
   }
 
-  int? _getReminderMinutes() {
-    switch (_selectedReminder) {
-      case '15 mins before': return 15;
-      case '30 mins before': return 30;
-      case '1 hour before': return 60;
-      case 'On time': return 0;
-      default: return null;
-    }
+  void _toggleReminder(int minutes) {
+    setState(() {
+      if (_selectedReminders.contains(minutes)) {
+        _selectedReminders.remove(minutes);
+      } else {
+        _selectedReminders.add(minutes);
+      }
+    });
+  }
+
+  String _getReminderLabel(int minutes) {
+    if (minutes == 0) return 'At time of event';
+    if (minutes < 60) return '$minutes mins before';
+    return '${minutes ~/ 60} hour before';
   }
 
   void _toggleRepeatDay(int day) {
@@ -183,7 +183,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
       endTime: _endTime,
       type: 'local',
       category: 'General',
-      reminderTime: _getReminderMinutes(),
+      reminders: _selectedReminders,
       sound: _selectedSound,
       isRepeating: _isRepeating,
       repeatDays: _selectedRepeatDays,
@@ -265,11 +265,12 @@ class _AddEventScreenState extends State<AddEventScreen> {
               SizedBox(height: 8),
               GestureDetector(
                 onTap: () async {
+                  final DateTime today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
                   final picked = await showDatePicker(
                     context: context,
                     initialDate: _selectedDate,
-                    firstDate: DateTime.now(),
-                    lastDate: DateTime.now().add(Duration(days: 365)),
+                    firstDate: today,
+                    lastDate: today.add(const Duration(days: 365)),
                   );
                   if (picked != null) setState(() => _selectedDate = picked);
                 },
@@ -357,25 +358,34 @@ class _AddEventScreenState extends State<AddEventScreen> {
                 ],
               ),
               SizedBox(height: 20),
-              // Reminder
-              Text('Reminder', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
-              SizedBox(height: 8),
-              DropdownButtonFormField<String>(
-                value: _selectedReminder,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Color(0xFF2A2F3F),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-                items: ['15 mins before', '30 mins before', '1 hour before', 'On time']
-                    .map((v) => DropdownMenuItem(value: v, child: Text(v)))
-                    .toList(),
-                onChanged: (value) => setState(() => _selectedReminder = value),
-                dropdownColor: Color(0xFF2A2F3F),
-                style: TextStyle(color: Colors.white),
+              // Reminder Selection (Multi-select)
+              Text('Reminders', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
+              SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [0, 5, 10, 15, 30, 60].map((minutes) {
+                  final isSelected = _selectedReminders.contains(minutes);
+                  return FilterChip(
+                    label: Text(_getReminderLabel(minutes)),
+                    selected: isSelected,
+                    onSelected: (_) => _toggleReminder(minutes),
+                    backgroundColor: Color(0xFF2A2F3F),
+                    selectedColor: Color(0xFF2ECC71).withOpacity(0.3),
+                    labelStyle: TextStyle(
+                      color: isSelected ? Color(0xFF2ECC71) : Colors.white70,
+                      fontSize: 12,
+                    ),
+                    checkmarkColor: Color(0xFF2ECC71),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      side: BorderSide(
+                        color: isSelected ? Color(0xFF2ECC71) : Colors.transparent,
+                        width: 1,
+                      ),
+                    ),
+                  );
+                }).toList(),
               ),
               SizedBox(height: 20),
               // Sound Selection

@@ -16,8 +16,11 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
+    companion object {
+        private const val ALARM_CHANNEL = "alarm_channel"
+    }
+
     private val RINGTONE_CHANNEL = "com.example.intigrity/ringtone"
-    private val ALARM_CHANNEL = "com.example.intigrity/alarm"
     private var pendingResult: MethodChannel.Result? = null
     private var flutterEngineInstance: FlutterEngine? = null
 
@@ -69,17 +72,28 @@ class MainActivity : FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, ALARM_CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
                 "setAlarm" -> {
-                    val id = call.argument<Int>("id") ?: 0
-                    val timeInMillis = call.argument<Long>("timeInMillis") ?: 0L
+                    val id = call.argument<Int>("alarmId") ?: 0
+                    val timeInMillis = call.argument<Long>("triggerTime") ?: 0L
                     val title = call.argument<String>("title") ?: "Alarm"
                     val soundUri = call.argument<String>("soundUri")
 
                     val alarmManager = getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
+                    
+                    // Check for Exact Alarm Permission (Android 12+)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        if (!alarmManager.canScheduleExactAlarms()) {
+                           val intent = Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                           intent.data = Uri.parse("package:$packageName")
+                           startActivity(intent)
+                           result.error("PERMISSION_DENIED", "Exact alarm permission not granted", null)
+                           return@setMethodCallHandler
+                        }
+                    }
+
                     val intent = Intent(this, AlarmReceiver::class.java).apply {
                         putExtra("id", id)
                         putExtra("title", title)
                         putExtra("soundUri", soundUri)
-                        // This prevents PendingIntent reuse from overriding extras if we schedule multiple
                         action = "ALARM_ACTION_$id" 
                     }
                     val pendingIntent = PendingIntent.getBroadcast(
@@ -93,10 +107,11 @@ class MainActivity : FlutterActivity() {
                     
                     val clockInfo = android.app.AlarmManager.AlarmClockInfo(timeInMillis, showPendingIntent)
                     alarmManager.setAlarmClock(clockInfo, pendingIntent)
+                    
                     result.success(true)
                 }
                 "cancelAlarm" -> {
-                    val id = call.argument<Int>("id") ?: 0
+                    val id = call.argument<Int>("alarmId") ?: 0
                     val alarmManager = getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
                     val intent = Intent(this, AlarmReceiver::class.java).apply {
                         action = "ALARM_ACTION_$id"
@@ -162,16 +177,22 @@ class MainActivity : FlutterActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        if (intent.getBooleanExtra("trigger_alarm", false)) {
+        if (intent.getBooleanExtra("trigger_alarm", true)) {
             val id = intent.getIntExtra("id", 0)
             val title = intent.getStringExtra("title") ?: "Alarm"
             val soundUri = intent.getStringExtra("soundUri")
             
-            intent.removeExtra("trigger_alarm")
-            
-            flutterEngineInstance?.let {
-                MethodChannel(it.dartExecutor.binaryMessenger, ALARM_CHANNEL)
-                    .invokeMethod("onAlarmRing", mapOf("id" to id, "title" to title, "soundUri" to soundUri))
+            // Critical check: only invoke if engine is ready
+            flutterEngineInstance?.let { engine ->
+                val binaryMessenger = engine.dartExecutor.binaryMessenger
+                if (binaryMessenger != null) {
+                    MethodChannel(binaryMessenger, ALARM_CHANNEL)
+                        .invokeMethod("onAlarmRing", mapOf(
+                            "id" to id, 
+                            "title" to title, 
+                            "soundUri" to soundUri
+                        ))
+                }
             }
         }
     }

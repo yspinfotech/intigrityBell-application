@@ -12,7 +12,7 @@ class Event {
   final String? createdBy;
   final String category;
   final int? notificationId;
-  final int? reminderTime; // Minutes before event
+  final List<int> reminders; // List of minutes before event
   final String sound; // 'default', 'alarm1', 'alarm2'
   final bool isRepeating;
   final List<int> repeatDays; // [1, 2, 3...] 1=Mon, 7=Sun
@@ -28,7 +28,7 @@ class Event {
     this.createdBy,
     this.category = 'General',
     this.notificationId,
-    this.reminderTime,
+    this.reminders = const [],
     this.sound = 'default',
     this.isRepeating = false,
     this.repeatDays = const [],
@@ -51,6 +51,14 @@ class Event {
   }
 
   factory Event.fromJson(Map<String, dynamic> json) {
+    // Handle migration from single reminderTime to List<int> reminders
+    List<int> remindersList = [];
+    if (json['reminders'] != null) {
+      remindersList = List<int>.from(json['reminders']);
+    } else if (json['reminderTime'] != null) {
+      remindersList = [json['reminderTime']];
+    }
+
     return Event(
       id: (json['_id'] ?? json['id'] ?? '').toString(),
       title: (json['title'] ?? '').toString(),
@@ -68,7 +76,7 @@ class Event {
       createdBy: (json['createdBy'] is Map) ? (json['createdBy']['name'] ?? '').toString() : json['createdBy']?.toString(),
       category: (json['category'] ?? 'General').toString(),
       notificationId: json['notificationId'],
-      reminderTime: json['reminderTime'],
+      reminders: remindersList,
       sound: (json['sound'] ?? 'default').toString(),
       isRepeating: json['isRepeating'] ?? false,
       repeatDays: List<int>.from(json['repeatDays'] ?? []),
@@ -84,7 +92,7 @@ class Event {
       'type': type,
       'category': category,
       'notificationId': notificationId,
-      'reminderTime': reminderTime,
+      'reminders': reminders,
       'sound': sound,
       'isRepeating': isRepeating,
       'repeatDays': repeatDays,

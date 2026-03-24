@@ -26,17 +26,12 @@ import 'screens/add_note_screen.dart';
 import 'screens/main_dashboard_screen.dart';
 import 'screens/plan_day_screen.dart';
 import 'screens/stats_dashboard_screen.dart';
-import 'package:alarm/alarm.dart';
 import 'screens/alarm_ring_screen.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Initialize Alarm Package (Step 1)
-  await Alarm.init();
-  debugPrint('⏰ Alarm system initialized');
   
   // Initialize timezone database for local notifications
   // This is required for zonedSchedule() to work correctly

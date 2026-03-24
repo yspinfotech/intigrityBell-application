@@ -10,6 +10,11 @@ class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val id = intent.getIntExtra("id", 0)
         
+        // Step 5: Wake Lock
+        val powerManager = context.getSystemService(Context.POWER_SERVICE) as android.os.PowerManager
+        val wakeLock = powerManager.newWakeLock(android.os.PowerManager.PARTIAL_WAKE_LOCK, "IntigrityBell::AlarmWakeLock")
+        wakeLock.acquire(10 * 1000L) // 10 seconds should be enough to start service
+        
         val serviceIntent = Intent(context, AlarmService::class.java).apply {
             putExtra("id", id)
             putExtra("title", intent.getStringExtra("title"))

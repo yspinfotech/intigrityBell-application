@@ -1,7 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../providers/event_provider.dart';
 import '../providers/task_provider.dart';
 import '../providers/user_provider.dart';
@@ -39,12 +41,15 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final userProvider = context.read<UserProvider>();
       if (userProvider.token != null) {
-        context.read<TaskProvider>().fetchTasks(userProvider.token!);
+        context.read<TaskProvider>().fetchTasks(userProvider.token!, currentUserId: userProvider.currentUser?.id);
         context.read<EventProvider>().fetchSystemEvents(userProvider.token!);
       }
       
       // Process any alarm that fired while app was starting (Step 7)
       NotificationService().processPendingAlarm();
+      
+      // Show battery optimization guide if needed (Post-alarm-fix polish)
+      _checkAndShowBatteryGuide();
     });
   }
 
@@ -52,6 +57,52 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     super.dispose();
+  }
+
+  Future<void> _checkAndShowBatteryGuide() async {
+    if (Platform.isAndroid) {
+      final status = await Permission.ignoreBatteryOptimizations.status;
+      if (status.isDenied || status.isLimited) {
+        _showBatteryOptimizationGuide();
+      }
+    }
+  }
+
+  void _showBatteryOptimizationGuide() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF2A2F3F),
+        title: const Row(
+          children: [
+            Icon(Icons.battery_saver, color: Color(0xFF2ECC71)),
+            SizedBox(width: 10),
+            Text('Alarm Reliability', style: TextStyle(color: Colors.white)),
+          ],
+        ),
+        content: const Text(
+          'To ensure your alarms ring exactly on time, please disable battery optimizations for INTIGrity-Bell.\n\nThis prevents the system from delaying or killing the alarm service.',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Maybe Later', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              NotificationService().requestIgnoreBatteryOptimizations();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF2ECC71),
+            ),
+            child: const Text('Settings'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
