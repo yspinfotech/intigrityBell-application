@@ -41,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final userProvider = context.read<UserProvider>();
       if (userProvider.token != null) {
-        context.read<TaskProvider>().fetchTasks(userProvider.token!, currentUserId: userProvider.currentUser?.id);
+        context.read<TaskProvider>().fetchTasks();
         context.read<EventProvider>().fetchSystemEvents(userProvider.token!);
       }
       

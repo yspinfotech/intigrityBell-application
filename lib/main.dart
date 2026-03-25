@@ -5,6 +5,7 @@ import 'package:timezone/data/latest.dart' as tz;
 
 // Providers
 import 'providers/user_provider.dart';
+import 'providers/auth_provider.dart';
 import 'providers/task_provider.dart';
 import 'providers/event_provider.dart';
 import 'providers/note_provider.dart';
@@ -60,6 +61,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => TaskProvider()),
         ChangeNotifierProvider(create: (_) => EventProvider()),
         ChangeNotifierProvider(create: (_) => NoteProvider()),

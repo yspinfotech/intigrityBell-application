@@ -1,48 +1,54 @@
-// lib/models/user_model.dart
-class User {
+class UserModel {
   final String id;
-  final String email;
   final String name;
+  final String email;
+  final String role; // "manager" or "member"
+  final String token;
   final bool notificationsEnabled;
   final bool darkModeEnabled;
-  final DateTime createdAt;
-  final String role; // 'admin', 'manager', 'team'
-  String? profileImageUrl;
+  final DateTime? createdAt;
+  final String? profileImageUrl;
 
-  User({
+  UserModel({
     required this.id,
-    required this.email,
     required this.name,
-    required this.notificationsEnabled,
-    required this.darkModeEnabled,
-    required this.createdAt,
-    this.role = 'team',
+    required this.email,
+    required this.role,
+    this.token = '',
+    this.notificationsEnabled = true,
+    this.darkModeEnabled = false,
+    this.createdAt,
     this.profileImageUrl,
   });
 
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    return UserModel(
+      id: json['_id'] ?? json['id'] ?? '',
+      name: json['name'] ?? '',
+      email: json['email'] ?? '',
+      role: json['role'] ?? 'member',
+      token: json['token'] ?? '',
+      notificationsEnabled: json['notificationsEnabled'] ?? true,
+      darkModeEnabled: json['darkModeEnabled'] ?? false,
+      createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt'].toString()) : DateTime.now(),
+      profileImageUrl: json['profileImageUrl'],
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'email': email,
+      '_id': id,
+      'id': id, // fallback
       'name': name,
+      'email': email,
+      'role': role,
+      'token': token,
       'notificationsEnabled': notificationsEnabled,
       'darkModeEnabled': darkModeEnabled,
-      'createdAt': createdAt.toIso8601String(),
-      'role': role,
+      'createdAt': createdAt?.toIso8601String(),
       'profileImageUrl': profileImageUrl,
     };
   }
-
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      id: (json['_id'] ?? json['id'] ?? '').toString(),
-      email: (json['email'] ?? '').toString(),
-      name: (json['name'] ?? '').toString(),
-      notificationsEnabled: json['notificationsEnabled'] ?? true,
-      darkModeEnabled: json['darkModeEnabled'] ?? true,
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
-      role: (json['role'] ?? 'team').toString(),
-      profileImageUrl: json['profileImageUrl']?.toString(),
-    );
-  }
 }
+
+typedef User = UserModel;

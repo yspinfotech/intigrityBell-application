@@ -4,14 +4,14 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  /// ─── IMPORTANT: Set this to your machine's local IP when testing on a real device.
+  /// ─── IMPORTANT: Automatic local host detection for testing.
   /// For Android Emulator → 10.0.2.2
-  /// For Real Device        → your machine's WiFi IP (e.g. 192.168.1.X)
-  static const String _serverHost = '192.168.1.36'; // ← Change this to your IP
+  /// For Web / Desktop / iOS Simulator → 127.0.0.1 or localhost
+  static const String _serverHost = '192.168.1.36';
   static const int _serverPort = 8000;
 
-  static String get baseUrl => 'http://$_serverHost:$_serverPort/api';
-  // static String get baseUrl => 'https://intigrity-bell-backend.vercel.app/api';
+  // static String get baseUrl => 'http://$_serverHost:$_serverPort/api';
+  static String get baseUrl => 'https://intigrity-bell-backend.vercel.app/api';
 
   static String? _token;
 

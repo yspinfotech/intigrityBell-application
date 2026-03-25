@@ -41,7 +41,7 @@ class _TaskScreenState extends State<TaskScreen> {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       final taskProvider = Provider.of<TaskProvider>(context, listen: false);
       if (userProvider.token != null) {
-        taskProvider.fetchTasks(userProvider.token!, currentUserId: userProvider.currentUser?.id);
+        taskProvider.fetchTasks();
       }
     });
   }
@@ -436,6 +436,7 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
   final _descController = TextEditingController();
   
   final List<String> _priorities = ['High', 'Medium', 'Low'];
+  final List<String> _statuses = ['pending', 'working', 'completed'];
 
   final AudioRecorder _audioRecorder = AudioRecorder();
   final AudioPlayer _previewPlayer = AudioPlayer();
@@ -489,6 +490,7 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
       _selectedAssignedToId = task.assignedTo;
       _selectedDate = task.scheduledDate;
       _selectedPriority = task.priority;
+      _selectedStatus = task.status;
       _selectedCategoryId = task.category;
       _recordedFilePath = task.voiceNote;
 
@@ -512,6 +514,7 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
   String? _selectedCategoryId;
   DateTime _selectedDate = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
   String _selectedPriority = 'Medium';
+  String _selectedStatus = 'pending';
 
   @override
   void dispose() {
@@ -678,6 +681,7 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
       createdDate: widget.existingTask?.createdDate ?? DateTime.now(),
       scheduledDate: _selectedDate,
       priority: _selectedPriority,
+      status: _selectedStatus,
       category: _selectedCategoryId ?? '', // Should be the ID
       assignedBy: userProvider.currentUser?.id,
       assignedTo: _selectedAssignedToId,
@@ -839,6 +843,18 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
               isDarkMode: isDarkMode,
               onChanged: (val) {
                 if (val != null) setState(() => _selectedPriority = val);
+              },
+            ),
+            const SizedBox(height: 16),
+            _buildDropdownField(
+              value: _selectedStatus,
+              hint: 'Status',
+              icon: Icons.checklist,
+              items: _statuses,
+              itemLabels: const ['Pending', 'Working', 'Completed'],
+              isDarkMode: isDarkMode,
+              onChanged: (val) {
+                if (val != null) setState(() => _selectedStatus = val);
               },
             ),
             const SizedBox(height: 24),

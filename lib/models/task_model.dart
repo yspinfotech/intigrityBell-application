@@ -1,86 +1,97 @@
-import 'package:intl/intl.dart';
+import 'user_model.dart';
+import 'voice_note_model.dart';
 
 class TaskModel {
   final String id;
   final String title;
   final String description;
-  final DateTime createdDate;
-  final DateTime scheduledDate;
-  final bool isCompleted;
-  final String priority; // Low, Medium, High
-  final String category; // Currently ID or name
-  final String? categoryName;
   final String? assignedBy;
-  final String? assignedByEmail;
-  final String? assignedByName;
   final String? assignedTo;
-  final String? assignedToName;
-  final String status; // 'pending', 'in-progress', 'completed'
-  final String? voiceNote;
+  final String? assignedByNameField;
+  final String? assignedToNameField;
+  final String status; // "pending", "working", "completed"
+  final List<VoiceNoteModel> voiceNotes;
+  final DateTime createdAt;
+
+  // Legacy Getters to support the old UI code without breaking
+  bool get isCompleted => status == 'completed';
+  DateTime get scheduledDate => createdAt;
+  DateTime get createdDate => createdAt;
+  String? get voiceNote => voiceNotes.isNotEmpty ? voiceNotes.first.audioUrl : null;
+  String get dateString => "${scheduledDate.year}-${scheduledDate.month.toString().padLeft(2, '0')}-${scheduledDate.day.toString().padLeft(2, '0')}";
+  String get timeString => "${scheduledDate.hour.toString().padLeft(2, '0')}:${scheduledDate.minute.toString().padLeft(2, '0')}";
+  String? get assignedToName => assignedToNameField ?? assignedTo;
+  String? get assignedByName => assignedByNameField ?? assignedBy;
+  String get priority => 'medium';
+  String get category => 'General';
+  String? get categoryName => null;
 
   TaskModel({
     required this.id,
     required this.title,
     required this.description,
-    required this.createdDate,
-    required this.scheduledDate,
-    this.isCompleted = false,
-    this.priority = 'Medium',
-    this.category = 'General',
-    this.categoryName,
     this.assignedBy,
-    this.assignedByEmail,
-    this.assignedByName,
     this.assignedTo,
-    this.assignedToName,
+    this.assignedByNameField,
+    this.assignedToNameField,
     this.status = 'pending',
-    this.voiceNote,
-  });
-
-  String get dateString => DateFormat('MMM dd, yyyy').format(scheduledDate);
-  String get timeString => DateFormat('h:mm a').format(scheduledDate);
+    this.voiceNotes = const [],
+    DateTime? createdAt,
+    DateTime? createdDate,
+    DateTime? scheduledDate,
+    String? priority,
+    String? category,
+    String? voiceNote,
+  }) : createdAt = createdAt ?? createdDate ?? DateTime.now();
 
   factory TaskModel.fromJson(Map<String, dynamic> json) {
-    String? catName;
-    String? catId;
-    if (json['category'] is Map) {
-      catId = (json['category']['_id'] ?? '').toString();
-      catName = (json['category']['name'] ?? 'General').toString();
+    var voiceNotesList = json['voiceNotes'] as List? ?? [];
+    List<VoiceNoteModel> voiceNotes = voiceNotesList.map((i) => VoiceNoteModel.fromJson(i)).toList();
+    
+    String? assignedToId;
+    String? assignedToNm;
+    if (json['assignedTo'] is Map) {
+      assignedToId = json['assignedTo']['_id'] ?? json['assignedTo']['id'];
+      assignedToNm = json['assignedTo']['name']?.toString();
     } else {
-      catId = (json['category'] ?? 'General').toString();
-      catName = catId;
+      assignedToId = json['assignedTo']?.toString();
+    }
+    
+    String? assignedById;
+    String? assignedByNm;
+    if (json['assignedBy'] is Map) {
+      assignedById = json['assignedBy']['_id'] ?? json['assignedBy']['id'];
+      assignedByNm = json['assignedBy']['name']?.toString();
+    } else {
+      assignedById = json['assignedBy']?.toString();
     }
 
     return TaskModel(
-      id: (json['_id'] ?? json['id'] ?? '').toString(),
-      title: (json['title'] ?? '').toString(),
-      description: (json['description'] ?? '').toString(),
-      createdDate: DateTime.parse(json['createdDate'] ?? json['createdAt'] ?? DateTime.now().toIso8601String()),
-      scheduledDate: DateTime.parse(json['scheduledDate'] ?? json['dueDate'] ?? DateTime.now().toIso8601String()),
-      isCompleted: (json['isCompleted'] == true || (json['status']?.toString().toLowerCase() == 'completed')),
-      priority: (json['priority'] ?? 'medium').toString(),
-      category: catId,
-      categoryName: catName,
-      assignedBy: (json['assignedBy'] is Map) ? (json['assignedBy']['_id'] ?? '').toString() : json['assignedBy']?.toString(),
-      assignedByName: (json['assignedBy'] is Map) ? (json['assignedBy']['name'] ?? '').toString() : null,
-      assignedByEmail: (json['assignedBy'] is Map) ? (json['assignedBy']['email'] ?? '').toString() : null,
-      assignedTo: (json['assignedTo'] is Map) ? (json['assignedTo']['_id'] ?? '').toString() : json['assignedTo']?.toString(),
-      assignedToName: (json['assignedTo'] is Map) ? (json['assignedTo']['name'] ?? '').toString() : null,
-      status: (json['status'] ?? (json['isCompleted'] == true ? 'completed' : 'pending')).toString(),
-      voiceNote: json['voiceNote']?.toString(),
+      id: json['_id'] ?? '',
+      title: json['title'] ?? '',
+      description: json['description'] ?? '',
+      assignedBy: assignedById,
+      assignedTo: assignedToId,
+      assignedByNameField: assignedByNm,
+      assignedToNameField: assignedToNm,
+      status: json['status'] ?? 'pending',
+      voiceNotes: voiceNotes,
+      createdAt: json['createdAt'] != null 
+          ? DateTime.parse(json['createdAt']) 
+          : DateTime.now(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
+      '_id': id,
       'title': title,
       'description': description,
-      'dueDate': scheduledDate.toIso8601String(),
-      'priority': priority.toLowerCase(),
-      'category': category, // Correct field name
+      'assignedBy': assignedBy,
       'assignedTo': assignedTo,
       'status': status,
-      'voiceNote': voiceNote,
+      'voiceNotes': voiceNotes.map((v) => v.toJson()).toList(),
+      'createdAt': createdAt.toIso8601String(),
     };
   }
 }
