@@ -83,23 +83,26 @@ class EventProvider extends ChangeNotifier {
     try {
       final response = await ApiService.get('/events', token: token);
       if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
-        final fetchedEvents = data.map((item) => Event.fromJson(item)).toList();
-        
-        // Cancel old system notifications before removal
-        for (var e in _events) {
-          if (e.type != 'local') {
-            _notificationService.cancelEventNotifications(e);
+        final body = jsonDecode(response.body);
+        if (body['success'] == true) {
+          final List<dynamic> data = body['data'];
+          final fetchedEvents = data.map((item) => Event.fromJson(item)).toList();
+          
+          // Cancel old system notifications before removal
+          for (var e in _events) {
+            if (e.type != 'local') {
+              _notificationService.cancelEventNotifications(e);
+            }
           }
-        }
-        
-        // Merge systems events with local ones
-        _events.removeWhere((e) => e.type != 'local');
-        _events.addAll(fetchedEvents);
-        
-        // Schedule notifications for new system events
-        for (var event in fetchedEvents) {
-          _notificationService.scheduleEventNotification(event);
+          
+          // Merge systems events with local ones
+          _events.removeWhere((e) => e.type != 'local');
+          _events.addAll(fetchedEvents);
+          
+          // Schedule notifications for new system events
+          for (var event in fetchedEvents) {
+            _notificationService.scheduleEventNotification(event);
+          }
         }
       }
     } catch (e) {

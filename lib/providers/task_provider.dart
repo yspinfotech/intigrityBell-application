@@ -92,8 +92,9 @@ class TaskProvider with ChangeNotifier {
     try {
       final response = await ApiService.put('/tasks/$taskId/status', {'status': status});
       if (response.statusCode == 200) {
-        final Map<String, dynamic> updatedJson = json.decode(response.body);
-        final updatedTask = TaskModel.fromJson(updatedJson);
+        final Map<String, dynamic> body = json.decode(response.body);
+        final taskData = body.containsKey('data') ? body['data'] : body;
+        final updatedTask = TaskModel.fromJson(taskData);
         
         final index = _tasks.indexWhere((t) => t.id == taskId);
         if (index != -1) {
@@ -120,12 +121,13 @@ class TaskProvider with ChangeNotifier {
         fileField: 'voiceNotes',
       );
       
-      final body = await response.stream.bytesToString();
-      debugPrint('🎙️ addVoiceNotes: status=${response.statusCode} body=$body');
+      final bodyText = await response.stream.bytesToString();
+      debugPrint('🎙️ addVoiceNotes: status=${response.statusCode} body=$bodyText');
       
-      if (response.statusCode == 201) {
-        final Map<String, dynamic> updatedJson = json.decode(body);
-        final updatedTask = TaskModel.fromJson(updatedJson);
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        final Map<String, dynamic> body = json.decode(bodyText);
+        final taskData = body.containsKey('data') ? body['data'] : body;
+        final updatedTask = TaskModel.fromJson(taskData);
         
         final index = _tasks.indexWhere((t) => t.id == taskId);
         if (index != -1) {
@@ -147,9 +149,10 @@ class TaskProvider with ChangeNotifier {
   Future<bool> addChatMessage(String taskId, String text) async {
     try {
       final response = await ApiService.post('/tasks/$taskId/message', {'text': text});
-      if (response.statusCode == 201) {
-        final Map<String, dynamic> updatedJson = json.decode(response.body);
-        final updatedTask = TaskModel.fromJson(updatedJson);
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        final Map<String, dynamic> body = json.decode(response.body);
+        final taskData = body.containsKey('data') ? body['data'] : body;
+        final updatedTask = TaskModel.fromJson(taskData);
         
         final index = _tasks.indexWhere((t) => t.id == taskId);
         if (index != -1) {
@@ -171,8 +174,9 @@ class TaskProvider with ChangeNotifier {
       debugPrint('🗑️ deleteVoiceNote: taskId=$taskId voiceId=$voiceId');
       final response = await ApiService.delete('/tasks/$taskId/voice/$voiceId');
       if (response.statusCode == 200) {
-        final Map<String, dynamic> updatedJson = json.decode(response.body);
-        final updatedTask = TaskModel.fromJson(updatedJson);
+        final Map<String, dynamic> body = json.decode(response.body);
+        final taskData = body.containsKey('data') ? body['data'] : body;
+        final updatedTask = TaskModel.fromJson(taskData);
         
         final index = _tasks.indexWhere((t) => t.id == taskId);
         if (index != -1) {
