@@ -67,7 +67,7 @@ class TaskModel {
     }
 
     return TaskModel(
-      id: json['_id'] ?? '',
+      id: json['_id'] ?? json['id'] ?? '',
       title: json['title'] ?? '',
       description: json['description'] ?? '',
       assignedBy: assignedById,

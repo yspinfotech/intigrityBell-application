@@ -7,11 +7,17 @@ class ApiService {
   /// ─── IMPORTANT: Automatic local host detection for testing.
   /// For Android Emulator → 10.0.2.2
   /// For Web / Desktop / iOS Simulator → 127.0.0.1 or localhost
-  static const String _serverHost = '192.168.1.36';
+  static const String _defaultHost = '192.168.1.36';
   static const int _serverPort = 8000;
 
-  // static String get baseUrl => 'http://$_serverHost:$_serverPort/api';
-  static String get baseUrl => 'https://intigrity-bell-backend.vercel.app/api';
+  static String get baseUrl {
+    // 10.0.2.2 is the special alias to your host loopback interface for Android emulators
+    if (!kIsWeb && Platform.isAndroid && _defaultHost == '127.0.0.1') {
+      return 'http://10.0.2.2:$_serverPort/api';
+    }
+    return 'http://$_defaultHost:$_serverPort/api';
+  }
+  // static String get baseUrl => 'https://intigrity-bell-backend.vercel.app/api';
 
   static String? _token;
 
@@ -103,7 +109,7 @@ class ApiService {
   static Future<http.StreamedResponse> postMultipart(
     String endpoint,
     Map<String, String> fields, {
-    String? filePath,
+    List<String>? filePaths,
     String? fileField = 'file',
     String? token,
   }) async {
@@ -113,10 +119,13 @@ class ApiService {
     if (effectiveToken != null) {
       request.headers['Authorization'] = 'Bearer $effectiveToken';
     }
+    debugPrint('🎙️ postMultipart: $uri');
+    debugPrint('🎙️ postMultipart headers: ${request.headers}');
     request.fields.addAll(fields);
-    if (filePath != null) {
-      request.files
-          .add(await http.MultipartFile.fromPath(fileField!, filePath));
+    if (filePaths != null) {
+      for (var path in filePaths) {
+        request.files.add(await http.MultipartFile.fromPath(fileField!, path));
+      }
     }
     return await request.send();
   }

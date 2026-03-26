@@ -48,7 +48,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       _descController.text,
       _assignedToController.text, // "6524..."
       'pending',
-      _recordedFilePath,
+      _recordedFilePath != null ? [_recordedFilePath!] : [],
     );
 
     if (success && mounted) {

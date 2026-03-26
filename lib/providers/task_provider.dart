@@ -17,7 +17,7 @@ class TaskProvider with ChangeNotifier {
   int get completedCount => completedTasks.length;
   double get productivityScore => _tasks.isEmpty ? 0.0 : (completedTasks.length / _tasks.length) * 100.0;
 
-  // Legacy Methods expected by other screens
+  // Legacy Methods
   List<TaskModel> getTasksByDate(DateTime date) => _tasks;
   List<TaskModel> getTodaysTasks() => _tasks;
   Future<void> toggleTaskCompletion(String id, String token) async {
@@ -25,11 +25,16 @@ class TaskProvider with ChangeNotifier {
   }
   Future<void> updateTask(TaskModel task, String token) async {}
   Future<void> addTask(TaskModel task, String token) async {
-    await createTask(task.title, task.description, task.assignedTo ?? '', task.status, task.voiceNote);
+    // Filter out null audioUrls and convert to List<String>
+    final audioPaths = task.voiceNotes
+        .where((v) => v.isVoice && v.audioUrl != null)
+        .map((v) => v.audioUrl!)
+        .toList();
+    await createTask(task.title, task.description, task.assignedTo ?? '', task.status, audioPaths);
   }
   void addLocalTask(TaskModel task) {}
 
-  // Current and Legacy Fetch Method
+  // Fetch Methods
   Future<void> fetchTasks() async {
     _isLoading = true;
     notifyListeners();
@@ -37,23 +42,29 @@ class TaskProvider with ChangeNotifier {
     try {
       final response = await ApiService.get('/tasks');
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
+        final decoded = json.decode(response.body);
+        List<dynamic> data;
+        if (decoded is List) {
+          data = decoded;
+        } else if (decoded is Map && decoded.containsKey('tasks')) {
+          data = decoded['tasks'] as List<dynamic>;
+        } else if (decoded is Map && decoded.containsKey('data')) {
+          data = decoded['data'] as List<dynamic>;
+        } else {
+          data = [];
+        }
         _tasks = data.map((json) => TaskModel.fromJson(json)).toList();
       }
     } catch (e) {
-      debugPrint('Error fetching tasks: $e');
+      debugPrint('❌ fetchTasks exception: $e');
     }
 
     _isLoading = false;
     notifyListeners();
   }
 
-  Future<bool> createTask(String title, String description, String assignedTo, String? status, String? initialAudioPath) async {
+  Future<bool> createTask(String title, String description, String assignedTo, String? status, List<String> audioPaths) async {
     try {
-      String? uploadedUrl;
-      if (initialAudioPath != null && initialAudioPath.isNotEmpty) {
-        uploadedUrl = await uploadAudioFile(initialAudioPath);
-      }
       final body = {
         'title': title,
         'description': description,
@@ -63,9 +74,9 @@ class TaskProvider with ChangeNotifier {
       final response = await ApiService.post('/tasks', body);
       if (response.statusCode == 201) {
         final newTask = json.decode(response.body);
-        final taskId = newTask['_id'];
-        if (uploadedUrl != null) {
-           await addVoiceNote(taskId, uploadedUrl);
+        final taskId = newTask['_id'] ?? newTask['id'];
+        if (audioPaths.isNotEmpty) {
+           await addVoiceNotes(taskId, audioPaths);
         } else {
            await fetchTasks();
         }
@@ -81,7 +92,16 @@ class TaskProvider with ChangeNotifier {
     try {
       final response = await ApiService.put('/tasks/$taskId/status', {'status': status});
       if (response.statusCode == 200) {
-        await fetchTasks();
+        final Map<String, dynamic> updatedJson = json.decode(response.body);
+        final updatedTask = TaskModel.fromJson(updatedJson);
+        
+        final index = _tasks.indexWhere((t) => t.id == taskId);
+        if (index != -1) {
+          _tasks[index] = updatedTask;
+          notifyListeners();
+        } else {
+          await fetchTasks();
+        }
         return true;
       }
     } catch (e) {
@@ -90,43 +110,59 @@ class TaskProvider with ChangeNotifier {
     return false;
   }
 
-  Future<String?> uploadAudioFile(String filePath) async {
-     try {
-        final response = await ApiService.postMultipart('/upload', {}, filePath: filePath, fileField: 'audio');
-        if (response.statusCode == 200) {
-           final responseData = await response.stream.bytesToString();
-           final decoded = json.decode(responseData);
-           return decoded['url'];
-        }
-     } catch (e) {
-        debugPrint('Upload audio error: $e');
-     }
-     return null;
-  }
-
-  Future<bool> recordAndAddVoiceNote(String taskId, String localAudioPath) async {
+  Future<bool> addVoiceNotes(String taskId, List<String> audioPaths) async {
     try {
-      String? audioUrl = await uploadAudioFile(localAudioPath);
-      if (audioUrl != null) {
-         return await addVoiceNote(taskId, audioUrl);
+      debugPrint('🎙️ addVoiceNotes: taskId=$taskId files=${audioPaths.length}');
+      final response = await ApiService.postMultipart(
+        '/tasks/$taskId/voice',
+        {},
+        filePaths: audioPaths,
+        fileField: 'voiceNotes',
+      );
+      
+      final body = await response.stream.bytesToString();
+      debugPrint('🎙️ addVoiceNotes: status=${response.statusCode} body=$body');
+      
+      if (response.statusCode == 201) {
+        final Map<String, dynamic> updatedJson = json.decode(body);
+        final updatedTask = TaskModel.fromJson(updatedJson);
+        
+        final index = _tasks.indexWhere((t) => t.id == taskId);
+        if (index != -1) {
+          _tasks[index] = updatedTask;
+          notifyListeners();
+        } else {
+          await fetchTasks();
+        }
+        return true;
+      } else {
+        debugPrint('❌ addVoiceNotes: server returned ${response.statusCode}');
       }
-    } catch(e) {
-      debugPrint('Error in recording flow: $e');
+    } catch (e) {
+      debugPrint('❌ addVoiceNotes exception: $e');
     }
     return false;
   }
 
-  Future<bool> addVoiceNote(String taskId, String audioUrl) async {
+  Future<bool> addChatMessage(String taskId, String text) async {
     try {
-      final response = await ApiService.post('/tasks/$taskId/voice', {'audioUrl': audioUrl});
+      final response = await ApiService.post('/tasks/$taskId/message', {'text': text});
       if (response.statusCode == 201) {
-        await fetchTasks();
+        final Map<String, dynamic> updatedJson = json.decode(response.body);
+        final updatedTask = TaskModel.fromJson(updatedJson);
+        
+        final index = _tasks.indexWhere((t) => t.id == taskId);
+        if (index != -1) {
+          _tasks[index] = updatedTask;
+          notifyListeners();
+        } else {
+          await fetchTasks();
+        }
         return true;
       }
     } catch (e) {
-      debugPrint('Error adding voice note: $e');
+      debugPrint('❌ addChatMessage exception: $e');
     }
     return false;
   }
 }
-

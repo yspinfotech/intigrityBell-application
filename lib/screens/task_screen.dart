@@ -9,6 +9,8 @@ import '../models/task_model.dart';
 import '../models/user_model.dart';
 import '../models/category_model.dart';
 import '../providers/category_provider.dart';
+import '../services/api_service.dart';
+import 'task_details_screen.dart';
 import 'dart:math';
 
 import 'package:record/record.dart';
@@ -78,23 +80,51 @@ class _TaskScreenState extends State<TaskScreen> {
       body: Consumer<TaskProvider>(
         builder: (context, taskProvider, child) {
           final tasks = taskProvider.tasks;
-          
+
+          // Show spinner while loading
+          if (taskProvider.isLoading) {
+            return const Center(
+              child: CircularProgressIndicator(color: Color(0xFF2ECC71)),
+            );
+          }
+
+          // Empty state only shown after loading finishes
           if (tasks.isEmpty) {
             return Center(
-              child: Text(
-                'No tasks yet',
-                style: TextStyle(color: isDarkMode ? Colors.white54 : Colors.black54, fontSize: 16),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.assignment_outlined, size: 64,
+                    color: isDarkMode ? Colors.white24 : Colors.black26),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No tasks yet',
+                    style: TextStyle(color: isDarkMode ? Colors.white54 : Colors.black54, fontSize: 16),
+                  ),
+                  const SizedBox(height: 8),
+                  TextButton.icon(
+                    onPressed: () {
+                      Provider.of<TaskProvider>(context, listen: false).fetchTasks();
+                    },
+                    icon: const Icon(Icons.refresh, color: Color(0xFF2ECC71)),
+                    label: const Text('Refresh', style: TextStyle(color: Color(0xFF2ECC71))),
+                  ),
+                ],
               ),
             );
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: tasks.length,
-            itemBuilder: (context, index) {
-              final TaskModel task = tasks[index];
-              return TaskCard(task: task);
-            },
+          return RefreshIndicator(
+            color: const Color(0xFF2ECC71),
+            onRefresh: () => taskProvider.fetchTasks(),
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: tasks.length,
+              itemBuilder: (context, index) {
+                final TaskModel task = tasks[index];
+                return TaskCard(task: task);
+              },
+            ),
           );
         },
       ),
@@ -117,69 +147,8 @@ class TaskCard extends StatefulWidget {
 }
 
 class _TaskCardState extends State<TaskCard> {
-  final AudioPlayer _audioPlayer = AudioPlayer();
-  bool _isPlaying = false;
   bool _isExpanded = false; // Expanding logic
-  Duration _duration = Duration.zero;
-  Duration _position = Duration.zero;
 
-  @override
-  void dispose() {
-    _audioPlayer.dispose();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _audioPlayer.onPlayerStateChanged.listen((state) {
-      if (mounted) setState(() => _isPlaying = state == PlayerState.playing);
-    });
-
-    _audioPlayer.onDurationChanged.listen((d) {
-      if (mounted) setState(() => _duration = d);
-    });
-
-    _audioPlayer.onPositionChanged.listen((p) {
-      if (mounted) setState(() => _position = p);
-    });
-
-    _audioPlayer.onPlayerComplete.listen((_) {
-      if (mounted) {
-        setState(() {
-          _isPlaying = false;
-          _position = Duration.zero;
-        });
-      }
-    });
-  }
-
-  void _togglePlayback() async {
-    if (_isPlaying) {
-      await _audioPlayer.pause();
-    } else {
-      if (widget.task.voiceNote == null) return;
-      print("Voice note path: ${widget.task.voiceNote}");
-      
-      if (widget.task.voiceNote!.startsWith('data:audio')) {
-        final base64String = widget.task.voiceNote!.split(',').last;
-        final bytes = base64Decode(base64String);
-        final tempDir = await getTemporaryDirectory();
-        final tempPath = '${tempDir.path}/temp_voice_note_${widget.task.id}.m4a';
-        await File(tempPath).writeAsBytes(bytes);
-        await _audioPlayer.play(DeviceFileSource(tempPath));
-      } else if (widget.task.voiceNote!.startsWith('http')) {
-        await _audioPlayer.play(UrlSource(widget.task.voiceNote!));
-      } else {
-        await _audioPlayer.play(DeviceFileSource(widget.task.voiceNote!));
-      }
-    }
-  }
-
-  String _formatDuration(Duration d) {
-    String twoDigits(int n) => n.toString().padLeft(2, "0");
-    return "${twoDigits(d.inMinutes.remainder(60))}:${twoDigits(d.inSeconds.remainder(60))}";
-  }
 
   Color _getPriorityColor(String priority) {
     switch (priority) {
@@ -226,11 +195,11 @@ class _TaskCardState extends State<TaskCard> {
         child: InkWell(
           borderRadius: BorderRadius.circular(20),
           onTap: () {
-            showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              backgroundColor: Colors.transparent,
-              builder: (context) => AddTaskModal(existingTask: widget.task),
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => TaskDetailsScreen(task: widget.task),
+              ),
             );
           },
           child: Padding(
@@ -298,59 +267,14 @@ class _TaskCardState extends State<TaskCard> {
                         const SizedBox(height: 10),
                       ],
                       // Voice Note Playback Full UI inside card
-                      if (widget.task.voiceNote != null) ...[
-                        Container(
-                          margin: const EdgeInsets.only(bottom: 10),
-                          padding: const EdgeInsets.only(left: 4, right: 12, top: 4, bottom: 4),
-                          decoration: BoxDecoration(
-                            color: isDarkMode ? Colors.white12 : Colors.black.withOpacity(0.04),
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              GestureDetector(
-                                onTap: _togglePlayback,
-                                child: Container(
-                                  padding: const EdgeInsets.all(6),
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFF2ECC71),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    _isPlaying ? Icons.pause : Icons.play_arrow,
-                                    color: Colors.white,
-                                    size: 16,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: SliderTheme(
-                                  data: SliderTheme.of(context).copyWith(
-                                    trackHeight: 2,
-                                    thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-                                    overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
-                                    activeTrackColor: const Color(0xFF2ECC71),
-                                    inactiveTrackColor: isDarkMode ? Colors.white24 : Colors.black12,
-                                    thumbColor: const Color(0xFF2ECC71),
-                                  ),
-                                  child: Slider(
-                                    value: _position.inMilliseconds.toDouble(),
-                                    max: _duration.inMilliseconds > 0 ? _duration.inMilliseconds.toDouble() : 1.0,
-                                    onChanged: (value) {
-                                      _audioPlayer.seek(Duration(milliseconds: value.toInt()));
-                                    },
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                _formatDuration(_position.inSeconds > 0 ? _position : _duration),
-                                style: TextStyle(color: textColor, fontSize: 10, fontWeight: FontWeight.w600),
-                              ),
-                            ],
-                          ),
-                        ),
+                      if (widget.task.voiceNotes.isNotEmpty) ...[
+                        for (var note in widget.task.voiceNotes)
+                          if (note.isVoice)
+                            VoicePlayerWidget(
+                              audioPath: note.audioUrl ?? '',
+                              label: '${note.role[0].toUpperCase()}${note.role.substring(1)}: ${note.uploadedBy.name}',
+                              isLocal: false,
+                            ),
                       ],
                       Row(
                         children: [
@@ -439,17 +363,12 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
   final List<String> _statuses = ['pending', 'working', 'completed'];
 
   final AudioRecorder _audioRecorder = AudioRecorder();
-  final AudioPlayer _previewPlayer = AudioPlayer();
 
   bool _isRecording = false;
-  String? _recordedFilePath;
+  List<String> _tempVoiceNotes = [];
 
   Timer? _recordTimer;
   int _recordDuration = 0;
-
-  bool _isPreviewPlaying = false;
-  Duration _previewDuration = Duration.zero;
-  Duration _previewPosition = Duration.zero;
 
   // Animation for recording indicator
   late AnimationController _pulseController;
@@ -462,27 +381,6 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
       duration: const Duration(milliseconds: 800),
     )..repeat(reverse: true);
 
-    _previewPlayer.onPlayerStateChanged.listen((state) {
-      if (mounted) setState(() => _isPreviewPlaying = state == PlayerState.playing);
-    });
-
-    _previewPlayer.onDurationChanged.listen((d) {
-      if (mounted) setState(() => _previewDuration = d);
-    });
-
-    _previewPlayer.onPositionChanged.listen((p) {
-      if (mounted) setState(() => _previewPosition = p);
-    });
-
-    _previewPlayer.onPlayerComplete.listen((_) {
-      if (mounted) {
-        setState(() {
-          _isPreviewPlaying = false;
-          _previewPosition = _previewDuration;
-        });
-      }
-    });
-
     if (widget.existingTask != null) {
       final task = widget.existingTask!;
       _titleController.text = task.title;
@@ -492,11 +390,6 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
       _selectedPriority = task.priority;
       _selectedStatus = task.status;
       _selectedCategoryId = task.category;
-      _recordedFilePath = task.voiceNote;
-
-      if (_recordedFilePath != null && !_recordedFilePath!.startsWith('data:')) {
-        _previewPlayer.setSourceDeviceFile(_recordedFilePath!);
-      }
     }
 
     // Fetch team members and categories for assignment
@@ -523,7 +416,6 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
     _titleController.dispose();
     _descController.dispose();
     _audioRecorder.dispose();
-    _previewPlayer.dispose();
     super.dispose();
   }
 
@@ -585,7 +477,6 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
     await _audioRecorder.start(const RecordConfig(), path: path);
     setState(() {
       _isRecording = true;
-      _recordedFilePath = null;
       _recordDuration = 0;
     });
 
@@ -600,46 +491,15 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
     
     setState(() {
       _isRecording = false;
-      _recordedFilePath = path;
-    });
-
-    if (path != null) {
-      await _previewPlayer.setSourceDeviceFile(path);
-    }
-  }
-
-  Future<void> _togglePreviewPlayback() async {
-    if (_isPreviewPlaying) {
-      await _previewPlayer.pause();
-    } else {
-      if (_recordedFilePath != null) {
-        if (_recordedFilePath!.startsWith('data:audio')) {
-          final base64String = _recordedFilePath!.split(',').last;
-          final bytes = base64Decode(base64String);
-          final tempDir = await getTemporaryDirectory();
-          final tempPath = '${tempDir.path}/temp_preview_${DateTime.now().millisecondsSinceEpoch}.m4a';
-          await File(tempPath).writeAsBytes(bytes);
-          await _previewPlayer.play(DeviceFileSource(tempPath));
-        } else if (_recordedFilePath!.startsWith('http')) {
-          await _previewPlayer.play(UrlSource(_recordedFilePath!));
-        } else {
-          if (_previewPosition == _previewDuration && _previewDuration > Duration.zero) {
-            await _previewPlayer.seek(Duration.zero);
-          }
-          await _previewPlayer.play(DeviceFileSource(_recordedFilePath!));
-        }
+      if (path != null) {
+         _tempVoiceNotes.add(path);
       }
-    }
+    });
   }
 
-  void _deleteRecording() {
-    _previewPlayer.stop();
+  void _deleteTempVoiceNote(int index) {
     setState(() {
-      _recordedFilePath = null;
-      _recordDuration = 0;
-      _previewPosition = Duration.zero;
-      _previewDuration = Duration.zero;
-      _isPreviewPlaying = false;
+      _tempVoiceNotes.removeAt(index);
     });
   }
 
@@ -663,17 +523,6 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
     final taskProvider = Provider.of<TaskProvider>(context, listen: false);
     final token = userProvider.token ?? '';
 
-    String? finalVoiceNote = _recordedFilePath;
-    if (_recordedFilePath != null && !_recordedFilePath!.startsWith('http') && !_recordedFilePath!.startsWith('data:')) {
-      try {
-        final bytes = await File(_recordedFilePath!).readAsBytes();
-        final base64String = base64Encode(bytes);
-        finalVoiceNote = 'data:audio/m4a;base64,$base64String';
-      } catch (e) {
-        print("Error encoding audio: $e");
-      }
-    }
-
     final newTask = TaskModel(
       id: widget.existingTask?.id ?? '',
       title: _titleController.text.trim(),
@@ -685,25 +534,35 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
       category: _selectedCategoryId ?? '', // Should be the ID
       assignedBy: userProvider.currentUser?.id,
       assignedTo: _selectedAssignedToId,
-      voiceNote: finalVoiceNote,
+      voiceNotes: [],
     );
 
-
     if (widget.existingTask != null) {
-      taskProvider.updateTask(newTask, token);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Task updated successfully'),
-          backgroundColor: const Color(0xFF2ECC71),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-      );
+      await taskProvider.updateTask(newTask, token);
+      if (_tempVoiceNotes.isNotEmpty) {
+        await taskProvider.addVoiceNotes(widget.existingTask!.id, _tempVoiceNotes);
+      }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Task updated successfully'),
+            backgroundColor: const Color(0xFF2ECC71),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        );
+      }
     } else {
-      taskProvider.addTask(newTask, token);
+      await taskProvider.createTask(
+        newTask.title, 
+        newTask.description, 
+        newTask.assignedTo ?? '', 
+        newTask.status, 
+        _tempVoiceNotes
+      );
     }
     
-    Navigator.of(context).pop();
+    if (mounted) Navigator.of(context).pop();
   }
 
   @override
@@ -714,6 +573,7 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
     final subtitleColor = isDarkMode ? Colors.white54 : Colors.black45;
     final UIInputBg = isDarkMode ? const Color(0xFF1A1A1A) : const Color(0xFFF5F7FA);
     final UIBorder = isDarkMode ? Colors.white12 : Colors.black12;
+    final isManager = Provider.of<UserProvider>(context, listen: false).isManager;
 
     return Container(
       decoration: BoxDecoration(
@@ -755,97 +615,111 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
             ),
             const SizedBox(height: 24),
             
-            _buildInputField(
-              controller: _titleController,
-              hint: 'Enter task title',
-              icon: Icons.title,
-              isDarkMode: isDarkMode,
-            ),
-            const SizedBox(height: 16),
-            
-            _buildInputField(
-              controller: _descController,
-              hint: 'Enter description',
-              icon: Icons.description,
-              maxLines: 3,
-              isDarkMode: isDarkMode,
-            ),
-            const SizedBox(height: 16),
-            
-            Consumer<UserProvider>(
-              builder: (context, userProvider, _) {
-                final members = userProvider.teamMembers;
-                return _buildDropdownField(
-                  value: _selectedAssignedToId,
-                  hint: 'Assign To (Optional)',
-                  icon: Icons.person_add_alt_1,
-                  items: members.map((u) => u.id).toList(), 
-                  itemLabels: members.map((u) => u.name).toList(),
-                  isDarkMode: isDarkMode,
-                  onChanged: (val) {
-                    setState(() => _selectedAssignedToId = val);
-                  },
-                );
-              },
-            ),
-            const SizedBox(height: 16),
+            if (isManager || widget.existingTask == null) ...[
+              _buildInputField(
+                controller: _titleController,
+                hint: 'Enter task title',
+                icon: Icons.title,
+                isDarkMode: isDarkMode,
+              ),
+              const SizedBox(height: 16),
+              
+              _buildInputField(
+                controller: _descController,
+                hint: 'Enter description',
+                icon: Icons.description,
+                maxLines: 3,
+                isDarkMode: isDarkMode,
+              ),
+              const SizedBox(height: 16),
+              
+              Consumer<UserProvider>(
+                builder: (context, userProvider, _) {
+                  final members = userProvider.teamMembers;
+                  return _buildDropdownField(
+                    value: _selectedAssignedToId,
+                    hint: 'Assign To (Optional)',
+                    icon: Icons.person_add_alt_1,
+                    items: members.map((u) => u.id).toList(), 
+                    itemLabels: members.map((u) => u.name).toList(),
+                    isDarkMode: isDarkMode,
+                    onChanged: (val) {
+                      setState(() => _selectedAssignedToId = val);
+                    },
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
 
-            Consumer<CategoryProvider>(
-              builder: (context, categoryProvider, _) {
-                final categories = categoryProvider.categories;
-                return _buildDropdownField(
-                  value: _selectedCategoryId,
-                  hint: 'Category',
-                  icon: Icons.category,
-                  items: categories.map((c) => c.id).toList(),
-                  itemLabels: categories.map((c) => c.name).toList(),
-                  isDarkMode: isDarkMode,
-                  onChanged: (val) {
-                    setState(() => _selectedCategoryId = val);
-                  },
-                );
-              },
-            ),
-            const SizedBox(height: 16),
+              Consumer<CategoryProvider>(
+                builder: (context, categoryProvider, _) {
+                  final categories = categoryProvider.categories;
+                  return _buildDropdownField(
+                    value: _selectedCategoryId,
+                    hint: 'Category',
+                    icon: Icons.category,
+                    items: categories.map((c) => c.id).toList(),
+                    itemLabels: categories.map((c) => c.name).toList(),
+                    isDarkMode: isDarkMode,
+                    onChanged: (val) {
+                      setState(() => _selectedCategoryId = val);
+                    },
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
 
-            GestureDetector(
-              onTap: _presentDateTimePicker,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                decoration: BoxDecoration(
-                  color: UIInputBg,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: UIBorder),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.calendar_month, color: Color(0xFF2ECC71)),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Text(
-                        DateFormat('MMM dd, yyyy - h:mm a').format(_selectedDate),
-                        style: TextStyle(color: textColor, fontSize: 16),
-                        overflow: TextOverflow.ellipsis,
+              GestureDetector(
+                onTap: _presentDateTimePicker,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  decoration: BoxDecoration(
+                    color: UIInputBg,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: UIBorder),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.calendar_month, color: Color(0xFF2ECC71)),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Text(
+                          DateFormat('MMM dd, yyyy - h:mm a').format(_selectedDate),
+                          style: TextStyle(color: textColor, fontSize: 16),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
-                    Icon(Icons.access_time, color: subtitleColor),
-                  ],
+                      Icon(Icons.access_time, color: subtitleColor),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-            _buildDropdownField(
-              value: _selectedPriority,
-              hint: 'Priority',
-              icon: Icons.flag,
-              items: _priorities,
-              isDarkMode: isDarkMode,
-              onChanged: (val) {
-                if (val != null) setState(() => _selectedPriority = val);
-              },
-            ),
-            const SizedBox(height: 16),
+              _buildDropdownField(
+                value: _selectedPriority,
+                hint: 'Priority',
+                icon: Icons.flag,
+                items: _priorities,
+                isDarkMode: isDarkMode,
+                onChanged: (val) {
+                  if (val != null) setState(() => _selectedPriority = val);
+                },
+              ),
+              const SizedBox(height: 16),
+            ] else ...[
+              Text(
+                widget.existingTask!.title,
+                style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                widget.existingTask!.description,
+                style: TextStyle(color: subtitleColor, fontSize: 14),
+              ),
+              const SizedBox(height: 16),
+            ],
+
             _buildDropdownField(
               value: _selectedStatus,
               hint: 'Status',
@@ -902,134 +776,88 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
   }
 
   Widget _buildVoiceNoteUI(bool isDarkMode, Color textColor, Color subtitleColor) {
-    if (_isRecording) {
-      // Actively Recording View
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              FadeTransition(
-                opacity: _pulseController,
-                child: Container(
-                  width: 12,
-                  height: 12,
-                  decoration: const BoxDecoration(
-                    color: Colors.redAccent,
-                    shape: BoxShape.circle,
-                  ),
-                ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (widget.existingTask != null && widget.existingTask!.voiceNotes.isNotEmpty) ...[
+          const Text('Previous Voice Notes:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+          const SizedBox(height: 8),
+          for (var note in widget.existingTask!.voiceNotes)
+            if (note.isVoice)
+              VoicePlayerWidget(
+                audioPath: note.audioUrl ?? '',
+                label: '${note.role[0].toUpperCase()}${note.role.substring(1)}: ${note.uploadedBy.name}',
+                isLocal: false,
               ),
-              const SizedBox(width: 12),
-              Text(
-                _formatTimer(_recordDuration),
-                style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'monospace'),
-              ),
-              const SizedBox(width: 8),
-              const Text('Recording...', style: TextStyle(color: Colors.redAccent, fontSize: 14)),
-            ],
-          ),
-          GestureDetector(
-            onTap: _stopRecording,
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.redAccent.withOpacity(0.15),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.stop, color: Colors.redAccent, size: 28),
-            ),
-          ),
+          const Divider(),
         ],
-      );
-    } else if (_recordedFilePath != null) {
-      // Audio Recorded -> Preview Playback View
-      return Column(
-        children: [
+        if (_tempVoiceNotes.isNotEmpty) ...[
+          const Text('Unsaved Voice Notes:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+          const SizedBox(height: 8),
+          for (int i = 0; i < _tempVoiceNotes.length; i++)
+             Row(
+               children: [
+                 Expanded(
+                   child: VoicePlayerWidget(
+                     audioPath: _tempVoiceNotes[i],
+                     isLocal: true,
+                     label: 'New Recording ${i+1}',
+                   ),
+                 ),
+                 IconButton(
+                   icon: const Icon(Icons.delete, color: Colors.redAccent),
+                   onPressed: () => _deleteTempVoiceNote(i),
+                 ),
+               ],
+             ),
+          const SizedBox(height: 16),
+        ],
+        if (_isRecording)
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Row(
+                children: [
+                  FadeTransition(
+                    opacity: _pulseController,
+                    child: Container(
+                      width: 12, height: 12,
+                      decoration: const BoxDecoration(color: Colors.redAccent, shape: BoxShape.circle),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(_formatTimer(_recordDuration), style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+                  const SizedBox(width: 8),
+                  const Text('Recording...', style: TextStyle(color: Colors.redAccent, fontSize: 14)),
+                ],
+              ),
               GestureDetector(
-                onTap: _togglePreviewPlayback,
+                onTap: _stopRecording,
                 child: Container(
                   padding: const EdgeInsets.all(10),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF2ECC71),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    _isPreviewPlaying ? Icons.pause : Icons.play_arrow,
-                    color: Colors.white,
-                    size: 28,
-                  ),
+                  decoration: BoxDecoration(color: Colors.redAccent.withOpacity(0.15), shape: BoxShape.circle),
+                  child: const Icon(Icons.stop, color: Colors.redAccent, size: 28),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SliderTheme(
-                      data: SliderTheme.of(context).copyWith(
-                        trackHeight: 2,
-                        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-                        overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
-                        activeTrackColor: const Color(0xFF2ECC71),
-                        inactiveTrackColor: isDarkMode ? Colors.white24 : Colors.black12,
-                        thumbColor: const Color(0xFF2ECC71),
-                      ),
-                      child: Slider(
-                        value: _previewPosition.inMilliseconds.toDouble(),
-                        max: _previewDuration.inMilliseconds > 0 ? _previewDuration.inMilliseconds.toDouble() : 1.0,
-                        onChanged: (value) async {
-                          final position = Duration(milliseconds: value.toInt());
-                          await _previewPlayer.seek(position);
-                        },
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(_formatDuration(_previewPosition), style: TextStyle(color: subtitleColor, fontSize: 12)),
-                          Text(_formatDuration(_previewDuration), style: TextStyle(color: subtitleColor, fontSize: 12)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-                onPressed: _deleteRecording,
               ),
             ],
+          )
+        else
+          GestureDetector(
+            onTap: _startRecording,
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(color: const Color(0xFF2ECC71).withOpacity(0.15), shape: BoxShape.circle),
+                  child: const Icon(Icons.mic, color: Color(0xFF2ECC71), size: 24),
+                ),
+                const SizedBox(width: 16),
+                Text('Hold to add a voice note', style: TextStyle(color: subtitleColor, fontWeight: FontWeight.w500)),
+              ],
+            ),
           ),
-        ],
-      );
-    } else {
-      // Idle / Start State
-      return GestureDetector(
-        onTap: _startRecording,
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: const Color(0xFF2ECC71).withOpacity(0.15),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.mic, color: Color(0xFF2ECC71), size: 24),
-            ),
-            const SizedBox(width: 16),
-            Text(
-              'Tap to record a voice note',
-              style: TextStyle(color: subtitleColor, fontSize: 14, fontWeight: FontWeight.w500),
-            ),
-          ],
-        ),
-      );
-    }
+      ],
+    );
   }
 
   Widget _buildInputField({
@@ -1133,6 +961,131 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
           }),
           onChanged: onChanged,
         ),
+      ),
+    );
+  }
+}
+
+class VoicePlayerWidget extends StatefulWidget {
+  final String audioPath;
+  final bool isLocal;
+  final String? label;
+
+  const VoicePlayerWidget({super.key, required this.audioPath, this.isLocal = false, this.label});
+
+  @override
+  State<VoicePlayerWidget> createState() => _VoicePlayerWidgetState();
+}
+
+class _VoicePlayerWidgetState extends State<VoicePlayerWidget> {
+  final AudioPlayer _player = AudioPlayer();
+  bool _isPlaying = false;
+  Duration _duration = Duration.zero;
+  Duration _position = Duration.zero;
+
+  @override
+  void initState() {
+    super.initState();
+    _player.onPlayerStateChanged.listen((state) {
+      if (mounted) setState(() => _isPlaying = state == PlayerState.playing);
+    });
+    _player.onDurationChanged.listen((d) {
+      if (mounted) setState(() => _duration = d);
+    });
+    _player.onPositionChanged.listen((p) {
+      if (mounted) setState(() => _position = p);
+    });
+    _player.onPlayerComplete.listen((_) {
+      if (mounted) {
+        setState(() {
+          _isPlaying = false;
+          _position = Duration.zero;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _player.dispose();
+    super.dispose();
+  }
+
+  void _togglePlay() async {
+    if (_isPlaying) {
+      await _player.pause();
+    } else {
+      // Resolve the full URL — backend stores relative paths like /uploads/file.m4a
+      String resolvedUrl = widget.audioPath;
+      if (!resolvedUrl.startsWith('http') && resolvedUrl.startsWith('/')) {
+        // Strip /api from baseUrl to get server root, e.g. http://192.168.1.36:8000
+        final serverRoot = ApiService.baseUrl.replaceAll('/api', '');
+        resolvedUrl = '$serverRoot$resolvedUrl';
+      }
+      debugPrint('🎵 Playing voice note: $resolvedUrl');
+      await _player.play(UrlSource(resolvedUrl));
+    }
+  }
+
+  String _format(Duration d) {
+    String twoDigits(int n) => n.toString().padLeft(2, "0");
+    return "${twoDigits(d.inMinutes.remainder(60))}:${twoDigits(d.inSeconds.remainder(60))}";
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: isDarkMode ? Colors.white12 : Colors.black.withOpacity(0.04),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: _togglePlay,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(
+                color: Color(0xFF2ECC71),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(_isPlaying ? Icons.pause : Icons.play_arrow, color: Colors.white, size: 20),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (widget.label != null)
+                  Text(widget.label!, style: TextStyle(fontSize: 10, color: isDarkMode ? Colors.white70 : Colors.black54)),
+                Row(
+                  children: [
+                    Expanded(
+                      child: SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          trackHeight: 2,
+                          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+                          overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
+                          activeTrackColor: const Color(0xFF2ECC71),
+                        ),
+                        child: Slider(
+                          value: _position.inMilliseconds.toDouble(),
+                          max: _duration.inMilliseconds > 0 ? _duration.inMilliseconds.toDouble() : 1.0,
+                          onChanged: (val) => _player.seek(Duration(milliseconds: val.toInt())),
+                        ),
+                      ),
+                    ),
+                    Text(_format(_position.inSeconds > 0 ? _position : _duration), style: const TextStyle(fontSize: 10)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
