@@ -165,4 +165,30 @@ class TaskProvider with ChangeNotifier {
     }
     return false;
   }
+
+  Future<bool> deleteVoiceNote(String taskId, String voiceId) async {
+    try {
+      debugPrint('🗑️ deleteVoiceNote: taskId=$taskId voiceId=$voiceId');
+      final response = await ApiService.delete('/tasks/$taskId/voice/$voiceId');
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> updatedJson = json.decode(response.body);
+        final updatedTask = TaskModel.fromJson(updatedJson);
+        
+        final index = _tasks.indexWhere((t) => t.id == taskId);
+        if (index != -1) {
+          _tasks[index] = updatedTask;
+          notifyListeners();
+        } else {
+          await fetchTasks();
+        }
+        return true;
+      } else {
+        final body = response.body;
+        debugPrint('❌ deleteVoiceNote: server returned ${response.statusCode} - $body');
+      }
+    } catch (e) {
+      debugPrint('❌ deleteVoiceNote exception: $e');
+    }
+    return false;
+  }
 }

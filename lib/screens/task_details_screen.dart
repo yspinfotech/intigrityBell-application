@@ -356,10 +356,12 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                               final note = task.voiceNotes[i];
                               final isMe = note.uploadedBy.id == currentUser?.id;
                               return _ChatBubble(
-                                key: ValueKey(note.createdAt.toString() + i.toString()),
+                                key: ValueKey(note.id ?? (note.createdAt.toString() + i.toString())),
+                                taskId: task.id,
                                 note: note,
                                 isMe: isMe,
                                 isDarkMode: isDarkMode,
+                                canDelete: isMe || isManager,
                               );
                             },
                           ),
@@ -505,14 +507,19 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
 }
 
 class _ChatBubble extends StatefulWidget {
+  final String taskId;
   final VoiceNoteModel note;
   final bool isMe;
   final bool isDarkMode;
+  final bool canDelete;
+  
   const _ChatBubble({
     super.key, 
+    required this.taskId,
     required this.note, 
     required this.isMe, 
     required this.isDarkMode,
+    required this.canDelete,
   });
 
   @override
@@ -553,6 +560,38 @@ class _ChatBubbleState extends State<_ChatBubble> {
     }
   }
 
+  Future<void> _delete() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Message?'),
+        content: const Text('Are you sure you want to remove this message?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true), 
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      final taskProvider = Provider.of<TaskProvider>(context, listen: false);
+      if (widget.note.id != null) {
+        print("Delete voiceId: ${widget.note.id}");
+        final success = await taskProvider.deleteVoiceNote(widget.taskId, widget.note.id!);
+        if (!success) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Failed to delete message'))
+            );
+          }
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isManager = widget.note.role == 'manager';
@@ -588,15 +627,28 @@ class _ChatBubbleState extends State<_ChatBubble> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (!widget.isMe)
-              Text(
-                '${widget.note.uploadedBy.name} (${widget.note.role.toUpperCase()})',
-                style: TextStyle(
-                  fontSize: 10, 
-                  fontWeight: FontWeight.bold, 
-                  color: accentColor,
-                ),
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (!widget.isMe)
+                  Text(
+                    '${widget.note.uploadedBy.name} (${widget.note.role.toUpperCase()})',
+                    style: TextStyle(
+                      fontSize: 10, 
+                      fontWeight: FontWeight.bold, 
+                      color: accentColor,
+                    ),
+                  )
+                else
+                  const Spacer(),
+                
+                if (widget.canDelete)
+                  GestureDetector(
+                    onTap: _delete,
+                    child: Icon(Icons.delete_outline, size: 14, color: Colors.redAccent.withOpacity(0.6)),
+                  ),
+              ],
+            ),
             const SizedBox(height: 4),
             
             if (widget.note.isText)

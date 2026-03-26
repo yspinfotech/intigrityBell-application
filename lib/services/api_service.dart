@@ -97,7 +97,7 @@ class ApiService {
       final response = await http
           .delete(uri, headers: _buildHeaders(token: token))
           .timeout(const Duration(seconds: 15));
-      debugPrint('[API DELETE] ${response.statusCode} $endpoint');
+      debugPrint('[API DELETE] ${response.statusCode} $endpoint - ${response.body}');
       return response;
     } catch (e) {
       debugPrint('[API DELETE ERROR] $endpoint → $e');

@@ -1,6 +1,7 @@
 import 'user_model.dart';
 
 class VoiceNoteModel {
+  final String? id; // Subdocument ID
   final String type; // "voice" or "text"
   final String? text;
   final String? audioUrl;
@@ -9,6 +10,7 @@ class VoiceNoteModel {
   final DateTime createdAt;
 
   VoiceNoteModel({
+    this.id,
     required this.type,
     this.text,
     this.audioUrl,
@@ -46,6 +48,7 @@ class VoiceNoteModel {
     }
 
     return VoiceNoteModel(
+      id: json['_id'] ?? json['audioUrl'] ?? json['text'],
       type: json['type'] ?? 'voice',
       text: json['text'],
       audioUrl: json['audioUrl'],
@@ -59,6 +62,7 @@ class VoiceNoteModel {
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'type': type,
       'text': text,
       'audioUrl': audioUrl,
