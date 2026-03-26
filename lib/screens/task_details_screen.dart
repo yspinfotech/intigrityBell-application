@@ -361,7 +361,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                                 note: note,
                                 isMe: isMe,
                                 isDarkMode: isDarkMode,
-                                canDelete: isMe || isManager,
+                                canDelete: isMe, // FIX 6: ONLY OWNER CAN DELETE
                               );
                             },
                           ),
@@ -577,19 +577,34 @@ class _ChatBubbleState extends State<_ChatBubble> {
     );
 
     if (confirmed == true) {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
       final taskProvider = Provider.of<TaskProvider>(context, listen: false);
+      
       if (widget.note.id != null) {
+        // FIX 9: DEBUG LOGS
+        print("Current user: ${userProvider.currentUser?.id}");
+        print("Voice owner: ${widget.note.uploadedBy.id}");
         print("Delete voiceId: ${widget.note.id}");
+
         final success = await taskProvider.deleteVoiceNote(widget.taskId, widget.note.id!);
         if (!success) {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Failed to delete message'))
-            );
+            _showSnack('You can only delete your own voice note', Colors.red);
           }
         }
       }
     }
+  }
+
+  void _showSnack(String msg, Color color) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(msg),
+      backgroundColor: color,
+      behavior: SnackBarBehavior.floating,
+      duration: const Duration(seconds: 2),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    ));
   }
 
   @override
