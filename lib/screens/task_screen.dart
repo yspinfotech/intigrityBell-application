@@ -50,9 +50,10 @@ class _TaskScreenState extends State<TaskScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = Theme.of(context).brightness == Brightness.dark ? const Color(0xFF121212) : const Color(0xFFF8F9FA);
+    final bgColor = Theme.of(context).scaffoldBackgroundColor;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final textColor = isDarkMode ? Colors.white : Colors.black87;
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
+    final subtitleColor = Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6) ?? Colors.grey;
 
     final userProvider = Provider.of<UserProvider>(context);
 
@@ -83,8 +84,8 @@ class _TaskScreenState extends State<TaskScreen> {
 
           // Show spinner while loading
           if (taskProvider.isLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: Color(0xFF2ECC71)),
+            return Center(
+              child: CircularProgressIndicator(color: Theme.of(context).primaryColor),
             );
           }
 
@@ -95,19 +96,19 @@ class _TaskScreenState extends State<TaskScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.assignment_outlined, size: 64,
-                    color: isDarkMode ? Colors.white24 : Colors.black26),
+                    color: Theme.of(context).iconTheme.color?.withOpacity(0.24)),
                   const SizedBox(height: 16),
                   Text(
                     'No tasks yet',
-                    style: TextStyle(color: isDarkMode ? Colors.white54 : Colors.black54, fontSize: 16),
+                    style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.54), fontSize: 16),
                   ),
                   const SizedBox(height: 8),
                   TextButton.icon(
                     onPressed: () {
                       Provider.of<TaskProvider>(context, listen: false).fetchTasks();
                     },
-                    icon: const Icon(Icons.refresh, color: Color(0xFF2ECC71)),
-                    label: const Text('Refresh', style: TextStyle(color: Color(0xFF2ECC71))),
+                    icon: Icon(Icons.refresh, color: Theme.of(context).primaryColor),
+                    label: Text('Refresh', style: TextStyle(color: Theme.of(context).primaryColor)),
                   ),
                 ],
               ),
@@ -115,7 +116,7 @@ class _TaskScreenState extends State<TaskScreen> {
           }
 
           return RefreshIndicator(
-            color: const Color(0xFF2ECC71),
+            color: Theme.of(context).primaryColor,
             onRefresh: () => taskProvider.fetchTasks(),
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
@@ -129,7 +130,7 @@ class _TaskScreenState extends State<TaskScreen> {
         },
       ),
       floatingActionButton: isManager ? FloatingActionButton(
-        backgroundColor: const Color(0xFF2ECC71),
+        backgroundColor: Theme.of(context).primaryColor,
         onPressed: () => _showAddTaskModal(context),
         child: const Icon(Icons.add, color: Colors.white, size: 28),
       ) : null,
@@ -150,16 +151,16 @@ class _TaskCardState extends State<TaskCard> {
   bool _isExpanded = false; // Expanding logic
 
 
-  Color _getPriorityColor(String priority) {
+  Color _getPriorityColor(String priority, BuildContext context) {
     switch (priority) {
       case 'High':
         return Colors.redAccent;
       case 'Medium':
         return Colors.orangeAccent;
       case 'Low':
-        return const Color(0xFF2ECC71);
+        return Theme.of(context).primaryColor;
       default:
-        return Colors.grey;
+        return Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.4) ?? Colors.grey;
     }
   }
 
@@ -172,9 +173,9 @@ class _TaskCardState extends State<TaskCard> {
     final isManager = userProvider.isManager;
     final token = userProvider.token ?? '';
 
-    final cardColor = isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
-    final textColor = isDarkMode ? Colors.white : Colors.black87;
-    final subtitleColor = isDarkMode ? Colors.white54 : Colors.black54;
+    final cardColor = Theme.of(context).cardColor;
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
+    final subtitleColor = Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.54) ?? Colors.grey;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -183,7 +184,7 @@ class _TaskCardState extends State<TaskCard> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDarkMode ? 0.3 : 0.05),
+            color: Theme.of(context).textTheme.bodyMedium!.color!.withOpacity(0.05),
             blurRadius: 10,
             spreadRadius: 0,
             offset: const Offset(0, 4),
@@ -215,7 +216,7 @@ class _TaskCardState extends State<TaskCard> {
                     margin: const EdgeInsets.only(top: 2, right: 12),
                     child: Icon(
                       widget.task.isCompleted ? Icons.check_circle : Icons.radio_button_unchecked,
-                      color: widget.task.isCompleted ? const Color(0xFF2ECC71) : subtitleColor,
+                      color: widget.task.isCompleted ? Theme.of(context).primaryColor : subtitleColor,
                       size: 24,
                     ),
                   ),
@@ -304,13 +305,13 @@ class _TaskCardState extends State<TaskCard> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: _getPriorityColor(widget.task.priority).withOpacity(0.15),
+                              color: _getPriorityColor(widget.task.priority, context).withOpacity(0.15),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
                               widget.task.priority,
                               style: TextStyle(
-                                color: _getPriorityColor(widget.task.priority),
+                                color: _getPriorityColor(widget.task.priority, context),
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -320,7 +321,7 @@ class _TaskCardState extends State<TaskCard> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: isDarkMode ? Colors.white12 : Colors.black.withOpacity(0.05),
+                              color: Theme.of(context).textTheme.bodyMedium!.color!.withOpacity(0.05),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
@@ -546,7 +547,7 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Task updated successfully'),
-            backgroundColor: const Color(0xFF2ECC71),
+            backgroundColor: Theme.of(context).primaryColor,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
@@ -568,11 +569,11 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
-    final textColor = isDarkMode ? Colors.white : Colors.black87;
-    final subtitleColor = isDarkMode ? Colors.white54 : Colors.black45;
-    final UIInputBg = isDarkMode ? const Color(0xFF1A1A1A) : const Color(0xFFF5F7FA);
-    final UIBorder = isDarkMode ? Colors.white12 : Colors.black12;
+    final bgColor = Theme.of(context).cardColor;
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
+    final subtitleColor = Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.45) ?? Colors.grey;
+    final UIInputBg = Theme.of(context).scaffoldBackgroundColor;
+    final UIBorder = Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.12) ?? Colors.black12;
     final isManager = Provider.of<UserProvider>(context, listen: false).isManager;
 
     return Container(
@@ -680,7 +681,7 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.calendar_month, color: Color(0xFF2ECC71)),
+                      Icon(Icons.calendar_month, color: Theme.of(context).primaryColor),
                       const SizedBox(width: 16),
                       Expanded(
                         child: Text(
@@ -753,7 +754,7 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
               height: 56,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2ECC71),
+                  backgroundColor: Theme.of(context).primaryColor,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
@@ -826,7 +827,7 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Text(_formatTimer(_recordDuration), style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+                  Text(_formatTimer(_recordDuration), style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
                   const SizedBox(width: 8),
                   const Text('Recording...', style: TextStyle(color: Colors.redAccent, fontSize: 14)),
                 ],
@@ -848,8 +849,8 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
               children: [
                 Container(
                   padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(color: const Color(0xFF2ECC71).withOpacity(0.15), shape: BoxShape.circle),
-                  child: const Icon(Icons.mic, color: Color(0xFF2ECC71), size: 24),
+                  decoration: BoxDecoration(color: Theme.of(context).primaryColor.withOpacity(0.15), shape: BoxShape.circle),
+                  child: Icon(Icons.mic, color: Theme.of(context).primaryColor, size: 24),
                 ),
                 const SizedBox(width: 16),
                 Text('Hold to add a voice note', style: TextStyle(color: subtitleColor, fontWeight: FontWeight.w500)),
@@ -867,17 +868,17 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
     int maxLines = 1,
     required bool isDarkMode,
   }) {
-    final bgColor = isDarkMode ? const Color(0xFF1A1A1A) : const Color(0xFFF5F7FA);
-    final borderColor = isDarkMode ? Colors.white12 : Colors.black12;
+    final bgColor = Theme.of(context).scaffoldBackgroundColor;
+    final borderColor = Theme.of(context).dividerColor;
     
     return TextField(
       controller: controller,
       maxLines: maxLines,
-      style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87),
+      style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(color: isDarkMode ? Colors.white54 : Colors.black45),
-        prefixIcon: Icon(icon, color: isDarkMode ? Colors.white54 : Colors.black45),
+        hintStyle: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.4)),
+        prefixIcon: Icon(icon, color: Theme.of(context).iconTheme.color?.withOpacity(0.6)),
         filled: true,
         fillColor: bgColor,
         border: OutlineInputBorder(
@@ -890,7 +891,7 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Color(0xFF2ECC71)),
+          borderSide: BorderSide(color: Theme.of(context).primaryColor),
         ),
       ),
     );
@@ -916,8 +917,8 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
     required bool isDarkMode,
     required ValueChanged<String?> onChanged,
   }) {
-    final bgColor = isDarkMode ? const Color(0xFF1A1A1A) : const Color(0xFFF5F7FA);
-    final borderColor = isDarkMode ? Colors.white12 : Colors.black12;
+    final bgColor = Theme.of(context).scaffoldBackgroundColor;
+    final borderColor = Theme.of(context).dividerColor;
 
     // Safety check: ensure 'value' is actually in 'items'
     String? displayValue = value;
@@ -936,13 +937,13 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
         child: DropdownButton<String>(
           value: displayValue,
           isExpanded: true,
-          dropdownColor: bgColor,
-          icon: Icon(Icons.arrow_drop_down, color: isDarkMode ? Colors.white54 : Colors.black54),
+          dropdownColor: Theme.of(context).cardColor,
+          icon: Icon(Icons.arrow_drop_down, color: Theme.of(context).iconTheme.color?.withOpacity(0.6)),
           hint: Row(
             children: [
-              Icon(icon, color: isDarkMode ? Colors.white54 : Colors.black45),
+              Icon(icon, color: Theme.of(context).iconTheme.color?.withOpacity(0.6)),
               const SizedBox(width: 16),
-              Text(hint, style: TextStyle(color: isDarkMode ? Colors.white54 : Colors.black45)),
+              Text(hint, style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.4))),
             ],
           ),
           items: List.generate(items.length, (index) {
@@ -952,9 +953,9 @@ class _AddTaskModalState extends State<AddTaskModal> with SingleTickerProviderSt
               value: itemValue,
               child: Row(
                 children: [
-                  Icon(icon, color: isDarkMode ? Colors.white54 : Colors.black54),
+                  Icon(icon, color: Theme.of(context).iconTheme.color?.withOpacity(0.6)),
                   const SizedBox(width: 16),
-                  Text(itemLabel, style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87)),
+                  Text(itemLabel, style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
                 ],
               ),
             );
@@ -1039,7 +1040,7 @@ class _VoicePlayerWidgetState extends State<VoicePlayerWidget> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: isDarkMode ? Colors.white12 : Colors.black.withOpacity(0.04),
+        color: Theme.of(context).scaffoldBackgroundColor,
         borderRadius: BorderRadius.circular(24),
       ),
       child: Row(
@@ -1048,8 +1049,8 @@ class _VoicePlayerWidgetState extends State<VoicePlayerWidget> {
             onTap: _togglePlay,
             child: Container(
               padding: const EdgeInsets.all(8),
-              decoration: const BoxDecoration(
-                color: Color(0xFF2ECC71),
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor,
                 shape: BoxShape.circle,
               ),
               child: Icon(_isPlaying ? Icons.pause : Icons.play_arrow, color: Colors.white, size: 20),
@@ -1061,7 +1062,7 @@ class _VoicePlayerWidgetState extends State<VoicePlayerWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (widget.label != null)
-                  Text(widget.label!, style: TextStyle(fontSize: 10, color: isDarkMode ? Colors.white70 : Colors.black54)),
+                  Text(widget.label!, style: TextStyle(fontSize: 10, color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7))),
                 Row(
                   children: [
                     Expanded(
@@ -1070,7 +1071,7 @@ class _VoicePlayerWidgetState extends State<VoicePlayerWidget> {
                           trackHeight: 2,
                           thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
                           overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
-                          activeTrackColor: const Color(0xFF2ECC71),
+                          activeTrackColor: Theme.of(context).primaryColor,
                         ),
                         child: Slider(
                           value: _position.inMilliseconds.toDouble(),

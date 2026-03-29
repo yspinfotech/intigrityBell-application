@@ -76,6 +76,7 @@ class MainActivity : FlutterActivity() {
                     val timeInMillis = call.argument<Long>("triggerTime") ?: 0L
                     val title = call.argument<String>("title") ?: "Alarm"
                     val soundUri = call.argument<String>("soundUri")
+                    val isRepeat = call.argument<Boolean>("isRepeat") ?: false
 
                     val alarmManager = getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
                     
@@ -94,6 +95,8 @@ class MainActivity : FlutterActivity() {
                         putExtra("id", id)
                         putExtra("title", title)
                         putExtra("soundUri", soundUri)
+                        putExtra("isRepeat", isRepeat)
+                        putExtra("timeInMillis", timeInMillis)
                         action = "ALARM_ACTION_$id" 
                     }
                     val pendingIntent = PendingIntent.getBroadcast(
@@ -177,7 +180,7 @@ class MainActivity : FlutterActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        if (intent.getBooleanExtra("trigger_alarm", true)) {
+        if (intent.getBooleanExtra("trigger_alarm", false)) {
             val id = intent.getIntExtra("id", 0)
             val title = intent.getStringExtra("title") ?: "Alarm"
             val soundUri = intent.getStringExtra("soundUri")

@@ -1,0 +1,94 @@
+﻿Launching lib\main.dart on CPH2381 in debug mode...
+Running Gradle task 'assembleDebug'...                             17.2s
+ΓêÜ Built build\app\outputs\flutter-apk\app-debug.apk
+Installing build\app\outputs\flutter-apk\app-debug.apk...          10.2s
+D/FlutterJNI(17599): Beginning load of flutter...
+D/FlutterJNI(17599): flutter (null) was loaded normally!
+I/flutter (17599): [IMPORTANT:flutter/shell/platform/android/android_context_vk_impeller.cc(62)] Using the Impeller rendering backend (Vulkan).
+I/flutter (17599): [IMPORTANT:flutter/shell/platform/android/android_context_gl_impeller.cc(104)] Using the Impeller rendering backend (OpenGLES).
+D/FlutterRenderer(17599): Width is zero. 0,0
+I/flutter (17599): Γ£à Timezone database initialized
+I/flutter (17599): ≡ƒöö Initializing Notification Service...
+D/FlutterRenderer(17599): Width is zero. 0,0
+D/FlutterJNI(17599): Sending viewport metrics to the engine.
+I/flutter (17599): Γ£à Timezone initialized securely to Asia/Kolkata
+D/FlutterJNI(17599): Sending viewport metrics to the engine.
+I/flutter (17599): ≡ƒô▒ Android SDK Version: 34
+I/flutter (17599): Exact alarm status: PermissionStatus.granted
+I/flutter (17599): Battery optimization status: PermissionStatus.denied
+I/flutter (17599): Requesting battery optimization ignore...
+I/flutter (17599): Γ£à Local Notifications initialized
+I/flutter (17599): Γ£à Notification Service initialized
+Syncing files to device CPH2381...                                 178ms
+
+Flutter run key commands.
+r Hot reload. 
+R Hot restart.
+h List all available interactive commands.
+d Detach (terminate "flutter run" but leave application running).
+c Clear the screen
+q Quit (terminate the application on the device).
+
+A Dart VM Service on CPH2381 is available at: http://127.0.0.1:53379/-3xf2qmKEnY=/
+The Flutter DevTools debugger and profiler on CPH2381 is available at: http://127.0.0.1:53379/-3xf2qmKEnY=/devtools/?uri=ws://127.0.0.1:53379/-3xf2qmKEnY=/ws
+I/Choreographer(17599): Skipped 73 frames!  The application may be doing too much work on its main thread.
+D/callGcSupression(17599): java.lang.NullPointerException: Attempt to invoke virtual method 'java.lang.Object java.lang.reflect.Method.invoke(java.lang.Object, java.lang.Object[])' on a null object reference
+D/callGcSupression(17599): java.lang.NullPointerException: Attempt to invoke virtual method 'java.lang.Object java.lang.reflect.Method.invoke(java.lang.Object, java.lang.Object[])' on a null object reference
+D/ScrollOptim [SceneManager](17599): updateCurrentActivity: mCurrentActivityName=com.example.intigrity.MainActivity, isOptEnable=true, isAnimAheadEnable=true, isFrameInsertEnable=true, InsertNum=1, isEnabledForScrollChanged=false
+D/ActivityThread(17599): ComponentInfo{com.example.intigrity/com.example.intigrity.MainActivity} checkFinished=false 4
+D/ResourcesManagerExtImpl(17599): applyConfigurationToAppResourcesLocked app.getDisplayId() return callback.displayId:-1
+I/Choreographer(17599): Skipped 42 frames!  The application may be doing too much work on its main thread.
+I/Quality (17599): Skipped: false 3 cost 25.341772 refreshRate 8336342 bit true processName com.example.intigrity
+D/ViewRootImplExtImpl(17599): wrapConfigInfoIntoFlags rotation=0, smallestScreenWidthDp=360, relayoutAsync=false, newFlags=23592960, title=com.example.intigrity/com.example.intigrity.MainActivity
+D/VRI[MainActivity](17599): relayoutWindow result, sizeChanged:false, surfaceControlChanged:false, transformHintChanged:false, mSurfaceSize:Point(1080, 2412), mLastSurfaceSize:Point(1080, 2412), mWidth:1080, mHeight:2412, requestedWidth:1080, requestedHeight:2412, transformHint:0, lastTransformHint:0, installOrientation:0, displayRotation:0, isSurfaceValid:true, attr.flag:-2122252032, useBlast:true, tmpFrames:ClientWindowFrames{frame=[0,0][1080,2412] display=[0,0][1080,2412] parentFrame=[0,0][0,0]}
+W/VRI[MainActivity](17599): updateBlastSurfaceIfNeeded, surfaceSize:Point(1080, 2412), lastSurfaceSize:Point(1080, 2412), format:-3, blastBufferQueue:android.graphics.BLASTBufferQueue@cac0e1a
+D/FlutterJNI(17599): Sending viewport metrics to the engine.
+D/BLASTBufferQueue(17599): [SurfaceView[com.example.intigrity/com.example.intigrity.MainActivity]#1](f:0,a:1) acquireNextBufferLocked size=1080x2364 mFrameNumber=1 applyTransaction=true mTimestamp=311911853817680(auto) mPendingTransactions.size=0 graphicBufferId=75587129442304 transform=0
+D/SurfaceView(17599): 89145059 finishedDrawing
+D/SurfaceView(17599): 89145059 performDrawFinished mAttachedToWindow true
+I/Quality (17599): Skipped: false 5 cost 45.837208 refreshRate 8336342 bit true processName com.example.intigrity
+I/SurfaceControl(17599):  setExtendedRangeBrightness sc=Surface(name=com.example.intigrity/com.example.intigrity.MainActivity)/@0x75d8328,currentBufferRatio=1.0,desiredRatio=1.0
+D/SurfaceView(17599): 89145059 dispatchDraw mDrawFinished true isAboveParent false (mPrivateFlags & PFLAG_SKIP_DRAW) 128
+D/SurfaceView(17599): 89145059 clearSurfaceViewPort mCornerRadius 0.0
+D/BLASTBufferQueue(17599): [VRI[MainActivity]#0](f:0,a:1) acquireNextBufferLocked size=1080x2412 mFrameNumber=1 applyTransaction=true mTimestamp=311911924793930(auto) mPendingTransactions.size=0 graphicBufferId=75587129442306 transform=0
+D/VRI[MainActivity](17599): Received frameCommittedCallback lastAttemptedDrawFrameNum=1 didProduceBuffer=true syncBuffer=false
+D/VRI[MainActivity](17599): draw finished.
+D/VRI[MainActivity](17599): reportDrawFinished
+D/VRI[MainActivity](17599): onFocusEvent true
+I/ample.intigrity(17599): Compiler allocated 6104KB to compile void android.view.ViewRootImpl.performTraversals()
+D/OplusScrollToTopManager(17599): com.example.intigrity/com.example.intigrity.MainActivity,This DecorView@fec5767[MainActivity] change focus to true
+I/flutter (17599): [API GET] https://intigrity-bell-backend.vercel.app/api/users
+D/ProfileInstaller(17599): Installing profile for com.example.intigrity
+I/flutter (17599): Auto-login failed or timed out: TimeoutException after 0:00:04.000000: Future not completed
+W/WindowOnBackDispatcher(17599): OnBackInvokedCallback is not enabled for the application.
+W/WindowOnBackDispatcher(17599): Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
+D/ViewRootImplExtImpl(17599): wrapConfigInfoIntoFlags rotation=0, smallestScreenWidthDp=360, relayoutAsync=true, newFlags=23592960, title=com.example.intigrity/com.example.intigrity.MainActivity
+D/VRI[MainActivity](17599): relayoutWindow result, sizeChanged:false, surfaceControlChanged:false, transformHintChanged:false, mSurfaceSize:Point(1080, 2412), mLastSurfaceSize:Point(1080, 2412), mWidth:1080, mHeight:2412, requestedWidth:1080, requestedHeight:2412, transformHint:0, lastTransformHint:0, installOrientation:0, displayRotation:0, isSurfaceValid:true, attr.flag:-2122252032, useBlast:true, tmpFrames:ClientWindowFrames{frame=[0,0][1080,2412] display=[0,0][1080,2412] parentFrame=[0,0][1080,2412]}
+W/VRI[MainActivity](17599): updateBlastSurfaceIfNeeded, surfaceSize:Point(1080, 2412), lastSurfaceSize:Point(1080, 2412), format:-3, blastBufferQueue:android.graphics.BLASTBufferQueue@cac0e1a
+D/FlutterJNI(17599): Sending viewport metrics to the engine.
+I/SurfaceControl(17599):  setExtendedRangeBrightness sc=Surface(name=com.example.intigrity/com.example.intigrity.MainActivity)/@0x75d8328,currentBufferRatio=1.0,desiredRatio=1.0
+I/Quality (17599): Skipped: false 3 cost 56.568436 refreshRate 16666403 bit true processName com.example.intigrity
+I/flutter (17599): [API GET] 200 /users
+D/OplusInputMethodManagerInternal(17599): get inputMethodManager extension: com.android.internal.view.IInputMethodManager$Stub$Proxy@d3db935
+D/ViewRootImplExtImpl(17599): the up motion event handled by client, just return
+I/Quality (17599): Skipped: false 2 cost 35.113007 refreshRate 16666717 bit true processName com.example.intigrity
+I/flutter (17599): [API GET] https://intigrity-bell-backend.vercel.app/api/tasks
+I/flutter (17599): [API GET] https://intigrity-bell-backend.vercel.app/api/events
+W/WindowOnBackDispatcher(17599): OnBackInvokedCallback is not enabled for the application.
+W/WindowOnBackDispatcher(17599): Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
+D/permissions_handler(17599): No permissions found in manifest for: []16
+D/ViewRootImplExtImpl(17599): wrapConfigInfoIntoFlags rotation=0, smallestScreenWidthDp=360, relayoutAsync=true, newFlags=23592960, title=com.example.intigrity/com.example.intigrity.MainActivity
+D/VRI[MainActivity](17599): relayoutWindow result, sizeChanged:false, surfaceControlChanged:false, transformHintChanged:false, mSurfaceSize:Point(1080, 2412), mLastSurfaceSize:Point(1080, 2412), mWidth:1080, mHeight:2412, requestedWidth:1080, requestedHeight:2412, transformHint:0, lastTransformHint:0, installOrientation:0, displayRotation:0, isSurfaceValid:true, attr.flag:-2122252032, useBlast:true, tmpFrames:ClientWindowFrames{frame=[0,0][1080,2412] display=[0,0][1080,2412] parentFrame=[0,0][1080,2412]}
+W/VRI[MainActivity](17599): updateBlastSurfaceIfNeeded, surfaceSize:Point(1080, 2412), lastSurfaceSize:Point(1080, 2412), format:-3, blastBufferQueue:android.graphics.BLASTBufferQueue@cac0e1a
+D/FlutterJNI(17599): Sending viewport metrics to the engine.
+I/flutter (17599): [API GET] 200 /events
+I/flutter (17599): ≡ƒòÆ Alarm instance calculated: 2026-03-27 17:31:00.000+0530 (Reminder: 0 mins)
+I/flutter (17599): ΓÅ░ Alarm ID: 63251367
+I/flutter (17599): ΓÅ░ Original Scheduled Time: 2026-03-27 17:31:00.000+0530
+I/flutter (17599): ΓÅ░ Clean Playback Time: 2026-03-27 17:31:00.000
+I/flutter (17599): ΓÅ░ Activating Native Alarm: Ram Navami at 2026-03-27 17:31:00.000+0530 (ID: 63251367)
+D/CompatibilityChangeReporter(17599): Compat change id reported: 160794467; UID 10464; state: ENABLED
+I/flutter (17599): Γ£à Native AlarmManager scheduled: Ram Navami at 2026-03-27 17:31:00.000+0530 (ID: 63251367, Repeat: false)
+I/flutter (17599): ≡ƒôà Total Alarms Scheduled for Ram Navami: 1
+D/ViewRootImplExtImpl(17599): the up motion event handled by client, just return
+D/ViewRootImplExtImpl(17599): the up motion event handled by client, just return

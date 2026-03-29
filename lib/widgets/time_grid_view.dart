@@ -112,7 +112,6 @@ class TimeGridView extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xFF2ECC71).withOpacity(0.6),
           borderRadius: BorderRadius.circular(4),
-          border: const Border(left: BorderSide(color: Color(0xFF2ECC71), width: 4)),
         ),
         padding: const EdgeInsets.all(4),
         child: Row(

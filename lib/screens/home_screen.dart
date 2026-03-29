@@ -73,17 +73,17 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF2A2F3F),
-        title: const Row(
+        backgroundColor: Theme.of(context).cardColor,
+        title: Row(
           children: [
-            Icon(Icons.battery_saver, color: Color(0xFF2ECC71)),
-            SizedBox(width: 10),
-            Text('Alarm Reliability', style: TextStyle(color: Colors.white)),
+            Icon(Icons.battery_saver, color: Theme.of(context).primaryColor),
+            const SizedBox(width: 10),
+            Text('Alarm Reliability', style: Theme.of(context).textTheme.titleLarge),
           ],
         ),
-        content: const Text(
-          'To ensure your alarms ring exactly on time, please disable battery optimizations for INTIGrity-Bell.\n\nThis prevents the system from delaying or killing the alarm service.',
-          style: TextStyle(color: Colors.white70),
+        content: Text(
+          'To ensure your alarms ring exactly on time, please disable battery optimizations for Integrity Bell.\n\nThis prevents the system from delaying or killing the alarm service.',
+          style: Theme.of(context).textTheme.bodyMedium,
         ),
         actions: [
           TextButton(
@@ -96,7 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
               NotificationService().requestIgnoreBatteryOptimizations();
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2ECC71),
+              backgroundColor: Theme.of(context).primaryColor,
             ),
             child: const Text('Settings'),
           ),
@@ -109,20 +109,20 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: const Color(0xFF1A1E2B),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       drawer: const CalendarDrawer(),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1E2B),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.menu, color: Colors.white),
+          icon: Icon(Icons.menu, color: Theme.of(context).iconTheme.color),
           onPressed: () => _scaffoldKey.currentState?.openDrawer(),
         ),
         title: Row(
           children: [
             Text(
               DateFormat('MMMM yyyy').format(_focusedDay),
-              style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 18),
             ),
             const SizedBox(width: 8),
             _buildViewSwitcher(),
@@ -130,24 +130,24 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.account_circle_outlined, color: Colors.white),
+            icon: Icon(Icons.account_circle_outlined, color: Theme.of(context).iconTheme.color),
             onPressed: () => Navigator.pushNamed(context, '/user-profile'),
           ),
           IconButton(
-            icon: const Icon(Icons.notifications_none_outlined, color: Colors.white),
+            icon: Icon(Icons.notifications_none_outlined, color: Theme.of(context).iconTheme.color),
             onPressed: () => Navigator.pushNamed(context, '/notifications'),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.pushNamed(context, '/add-event'),
-        backgroundColor: const Color(0xFF2ECC71),
+        backgroundColor: Theme.of(context).primaryColor,
         child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
       body: _buildCurrentView(),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: const Color(0xFF2A2F3F),
-        selectedItemColor: const Color(0xFF2ECC71),
+        backgroundColor: Theme.of(context).cardColor,
+        selectedItemColor: Theme.of(context).primaryColor,
         unselectedItemColor: Colors.grey,
         currentIndex: _currentIndex,
         type: BottomNavigationBarType.fixed,
@@ -155,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.add_circle_outline), label: 'Add Event'),
           BottomNavigationBarItem(icon: Icon(Icons.today), label: 'Plan Day'),
-          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'Stats'),
+          // BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'Stats'),
         ],
         onTap: (index) {
           if (index == 0) {
@@ -182,7 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return PopupMenuButton<CalendarViewType>(
       initialValue: _viewType,
       offset: const Offset(0, 40),
-      icon: const Icon(Icons.arrow_drop_down, color: Colors.white70),
+      icon: Icon(Icons.arrow_drop_down, color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7)),
       onSelected: (view) {
         setState(() {
           _viewType = view;
@@ -250,7 +250,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF2A2F3F),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
       ),
       child: TableCalendar(
@@ -266,13 +266,13 @@ class _HomeScreenState extends State<HomeScreen> {
             _focusedDay = focusedDay;
           });
         },
-        calendarStyle: const CalendarStyle(
-          defaultTextStyle: TextStyle(color: Colors.white),
-          weekendTextStyle: TextStyle(color: Colors.white70),
-          outsideTextStyle: TextStyle(color: Colors.grey),
-          selectedDecoration: BoxDecoration(color: Color(0xFF2ECC71), shape: BoxShape.circle),
-          todayDecoration: BoxDecoration(color: Color(0xFF6C63FF), shape: BoxShape.circle),
-          markerDecoration: BoxDecoration(color: Color(0xFF2ECC71), shape: BoxShape.circle),
+        calendarStyle: CalendarStyle(
+          defaultTextStyle: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
+          weekendTextStyle: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.7)),
+          outsideTextStyle: const TextStyle(color: Colors.grey),
+          selectedDecoration: BoxDecoration(color: Theme.of(context).primaryColor, shape: BoxShape.circle),
+          todayDecoration: const BoxDecoration(color: Color(0xFF6C63FF), shape: BoxShape.circle),
+          markerDecoration: BoxDecoration(color: Theme.of(context).primaryColor, shape: BoxShape.circle),
         ),
         daysOfWeekStyle: const DaysOfWeekStyle(
           weekdayStyle: TextStyle(color: Colors.grey, fontSize: 12),
@@ -295,7 +295,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Text(
                   "Agenda for ${DateFormat('MMM dd').format(_selectedDay ?? DateTime.now())}",
-                  style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 18),
                 ),
               ],
             ),
@@ -325,7 +325,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text("Daily Plans", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                          Text("Daily Plans", style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 16)),
                           TextButton(
                             onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => PlanDayScreen(initialDate: _selectedDay ?? DateTime.now()))),
                             child: const Text("View All", style: TextStyle(color: Colors.blue, fontSize: 12)),
@@ -334,7 +334,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     ...plans.map((plan) => _buildPlanCard(plan, planDayProvider)),
-                    const Divider(color: Colors.white24, height: 32),
+                    Divider(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.24), height: 32),
                   ],
                   if (events.isNotEmpty) ...events.map((event) => _buildEventCard(event)),
                   if (tasks.isNotEmpty) ...tasks.map((task) => _buildTaskCard(task, taskProvider)),
@@ -356,7 +356,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Icon(Icons.event_note, color: Colors.grey[600], size: 64),
             const SizedBox(height: 16),
-            const Text('No plans for today', style: TextStyle(color: Colors.white54, fontSize: 16)),
+            Text('No plans for today', style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.54), fontSize: 16)),
           ],
         ),
       ),
@@ -369,9 +369,8 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: const EdgeInsets.all(12),
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF2A2F3F),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border(left: BorderSide(color: color, width: 4)),
       ),
       child: InkWell(
         onTap: () {
@@ -385,20 +384,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   Text(
                     event.title,
-                    style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 14),
                   ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.access_time, color: Colors.white54, size: 12),
+                      Icon(Icons.access_time, color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.54), size: 12),
                       const SizedBox(width: 4),
-                      Text(event.timeRange, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                      Text(event.timeRange, style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.54), fontSize: 12)),
                     ],
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: Colors.white38),
+            Icon(Icons.chevron_right, color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.38)),
           ],
         ),
       ),
@@ -410,9 +409,8 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: const EdgeInsets.all(12),
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF2A2F3F),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: const Border(left: BorderSide(color: Color(0xFF2ECC71), width: 4)),
       ),
       child: Row(
         children: [
@@ -422,7 +420,7 @@ class _HomeScreenState extends State<HomeScreen> {
               final userProvider = Provider.of<UserProvider>(context, listen: false);
               taskProvider.toggleTaskCompletion(task.id, userProvider.token ?? '');
             },
-            activeColor: const Color(0xFF2ECC71),
+            activeColor: Theme.of(context).primaryColor,
           ),
           Expanded(
             child: Column(
@@ -430,15 +428,13 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Text(
                   task.title,
-                  style: TextStyle(
-                    color: Colors.white,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontSize: 14,
-                    fontWeight: FontWeight.w600,
                     decoration: task.isCompleted ? TextDecoration.lineThrough : null,
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(task.timeString, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                Text(task.timeString, style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.54), fontSize: 12)),
               ],
             ),
           ),
@@ -453,32 +449,29 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: const EdgeInsets.all(12),
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF2A2F3F),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: const Border(left: BorderSide(color: Colors.blue, width: 4)),
       ),
       child: Row(
         children: [
-          Checkbox(
-            value: plan.isCompleted,
-            onChanged: (_) => provider.togglePlanStatus(plan.id),
-            activeColor: const Color(0xFF2ECC71),
-          ),
+          // Checkbox(
+          //   value: plan.isCompleted,
+          //   onChanged: (_) => provider.togglePlanStatus(plan.id),
+          //   activeColor: Theme.of(context).primaryColor,
+          // ),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   plan.title,
-                  style: TextStyle(
-                    color: Colors.white,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontSize: 14,
-                    fontWeight: FontWeight.w600,
                     decoration: plan.isCompleted ? TextDecoration.lineThrough : null,
                   ),
                 ),
                 if (plan.description.isNotEmpty)
-                  Text(plan.description, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                  Text(plan.description, style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.54), fontSize: 12)),
               ],
             ),
           ),
@@ -494,7 +487,7 @@ class _HomeScreenState extends State<HomeScreen> {
     switch (priority.toLowerCase()) {
       case 'high': color = Colors.redAccent; break;
       case 'medium': color = Colors.orangeAccent; break;
-      default: color = const Color(0xFF2ECC71);
+      default: color = Theme.of(context).primaryColor;
     }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

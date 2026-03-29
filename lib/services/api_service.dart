@@ -10,14 +10,14 @@ class ApiService {
   static const String _defaultHost = '192.168.1.36';
   static const int _serverPort = 8000;
 
-  static String get baseUrl {
-    // 10.0.2.2 is the special alias to your host loopback interface for Android emulators
-    if (!kIsWeb && Platform.isAndroid && _defaultHost == '127.0.0.1') {
-      return 'http://10.0.2.2:$_serverPort/api';
-    }
-    return 'http://$_defaultHost:$_serverPort/api';
-  }
-  // static String get baseUrl => 'https://intigrity-bell-backend.vercel.app/api';
+  // static String get baseUrl {
+  //   // 10.0.2.2 is the special alias to your host loopback interface for Android emulators
+  //   if (!kIsWeb && Platform.isAndroid && _defaultHost == '127.0.0.1') {
+  //     return 'http://10.0.2.2:$_serverPort/api';
+  //   }
+  //   return 'http://$_defaultHost:$_serverPort/api';
+  // }
+  static String get baseUrl => 'https://intigrity-bell-backend.vercel.app/api';
 
   static String? _token;
 

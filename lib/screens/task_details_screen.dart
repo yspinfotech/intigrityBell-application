@@ -174,19 +174,19 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
   Color _statusColor(String s) {
     switch (s) {
       case 'working': return Colors.orangeAccent;
-      case 'completed': return const Color(0xFF2ECC71);
-      default: return Colors.blueGrey;
+      case 'completed': return Theme.of(context).primaryColor;
+      default: return Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.4) ?? Colors.grey;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDarkMode ? const Color(0xFF121212) : const Color(0xFFF8F9FA);
-    final cardColor = isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
-    final textColor = isDarkMode ? Colors.white : Colors.black87;
-    final subtitleColor = isDarkMode ? Colors.white60 : Colors.black54;
-    final border = isDarkMode ? Colors.white12 : Colors.black12;
+    final bgColor = Theme.of(context).scaffoldBackgroundColor;
+    final cardColor = Theme.of(context).cardColor;
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
+    final subtitleColor = Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6) ?? Colors.grey;
+    final border = Theme.of(context).dividerColor;
 
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final isManager = userProvider.isManager;
@@ -398,15 +398,15 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                                 margin: const EdgeInsets.only(right: 8),
                                 padding: const EdgeInsets.symmetric(horizontal: 12),
                                 decoration: BoxDecoration(
-                                  color: Colors.blueAccent.withOpacity(0.1),
+                                  color: Theme.of(context).primaryColor.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(30),
-                                  border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
+                                  border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.3)),
                                 ),
                                 child: Row(
                                   children: [
-                                    const Icon(Icons.mic, size: 16, color: Colors.blueAccent),
+                                    Icon(Icons.mic, size: 16, color: Theme.of(context).primaryColor),
                                     const SizedBox(width: 4),
-                                    Text('Voice ${i+1}', style: const TextStyle(fontSize: 12, color: Colors.blueAccent)),
+                                    Text('Voice ${i+1}', style: TextStyle(fontSize: 12, color: Theme.of(context).primaryColor)),
                                     IconButton(
                                       icon: const Icon(Icons.close, size: 14, color: Colors.redAccent),
                                       onPressed: () => _removePending(i),
@@ -438,7 +438,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                                     )
                                   : Container(
                                       decoration: BoxDecoration(
-                                        color: isDarkMode ? Colors.black12 : Colors.grey[100],
+                                        color: Theme.of(context).scaffoldBackgroundColor,
                                         borderRadius: BorderRadius.circular(24),
                                         border: Border.all(color: border),
                                       ),
@@ -468,7 +468,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                               )
                             else if (_chatController.text.trim().isNotEmpty)
                               CircleAvatar(
-                                backgroundColor: Colors.blueAccent,
+                                backgroundColor: Theme.of(context).primaryColor,
                                 child: IconButton(
                                   icon: const Icon(Icons.send, color: Colors.white),
                                   onPressed: _sendText,
@@ -476,7 +476,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                               )
                             else if (_pendingVoiceNotes.isNotEmpty)
                               CircleAvatar(
-                                backgroundColor: Colors.blueAccent,
+                                backgroundColor: Theme.of(context).primaryColor,
                                 child: _isUploading 
                                   ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) 
                                   : IconButton(
@@ -486,7 +486,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                               )
                             else
                               CircleAvatar(
-                                backgroundColor: const Color(0xFF2ECC71),
+                                backgroundColor: Theme.of(context).primaryColor,
                                 child: IconButton(
                                   icon: const Icon(Icons.mic, color: Colors.white),
                                   onPressed: _startRecording,
@@ -611,10 +611,10 @@ class _ChatBubbleState extends State<_ChatBubble> {
   Widget build(BuildContext context) {
     final isManager = widget.note.role == 'manager';
     final bubbleColor = widget.isMe 
-        ? (widget.isDarkMode ? Colors.blueAccent.withOpacity(0.2) : const Color(0xFFDCF8C6))
-        : (widget.isDarkMode ? Colors.grey[850] : Colors.white);
+        ? (widget.isDarkMode ? Theme.of(context).primaryColor.withOpacity(0.2) : Theme.of(context).primaryColor.withOpacity(0.1))
+        : (widget.isDarkMode ? Theme.of(context).cardColor : Theme.of(context).cardColor);
     
-    final accentColor = isManager ? Colors.blueAccent : const Color(0xFF2ECC71);
+    final accentColor = isManager ? Theme.of(context).primaryColor : Theme.of(context).primaryColor;
 
     return Align(
       alignment: widget.isMe ? Alignment.centerRight : Alignment.centerLeft,

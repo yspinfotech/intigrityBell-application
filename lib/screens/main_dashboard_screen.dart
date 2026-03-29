@@ -12,11 +12,11 @@ class MainDashboardScreen extends StatelessWidget {
     final isManager = userProvider.isManager;
 
     return Scaffold(
-      backgroundColor: Color(0xFF1A1E2B),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         flexibleSpace: Container(
-             color: Color(0xFF1A1E2B),
+             color: Theme.of(context).scaffoldBackgroundColor,
         ),
         elevation: 0,
         automaticallyImplyLeading: false, 
@@ -26,7 +26,7 @@ class MainDashboardScreen extends StatelessWidget {
             Row(
               children: [
                 IconButton(
-                  icon: Icon(Icons.account_circle_outlined, color: Colors.white, size: 28),
+                  icon: Icon(Icons.account_circle_outlined, color: Theme.of(context).textTheme.bodyLarge?.color, size: 28),
                   onPressed: () => Navigator.pushNamed(context, '/user-profile'),
                 ),
                 Column(
@@ -35,11 +35,15 @@ class MainDashboardScreen extends StatelessWidget {
                   children: [
                     Text(
                       user?.name ?? 'Guest',
-                      style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold, fontSize: 14),
                     ),
                     Text(
                       user?.role.toUpperCase() ?? 'TEAM',
-                      style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 10, fontWeight: FontWeight.w500),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6),
+                        fontSize: 10, 
+                        fontWeight: FontWeight.w500
+                      ),
                     ),
                   ],
                 ),
@@ -47,7 +51,7 @@ class MainDashboardScreen extends StatelessWidget {
             ),
             Image.asset(
               'assets/images/logo.png',
-              height: 78,
+              height: 60,
               fit: BoxFit.contain,
             ),
           ],
@@ -126,11 +130,11 @@ class MainDashboardScreen extends StatelessWidget {
       SnackBar(
         behavior: SnackBarBehavior.floating,
         margin: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        backgroundColor: Color(0xFF2A2F3F),
+        backgroundColor: Theme.of(context).snackBarTheme.backgroundColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
           side: BorderSide(
-            color: Color(0xFFFFFFFF).withOpacity(0.4),
+            color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.1) ?? Colors.grey.withOpacity(0.2),
             width: 1,
           ),
         ),
@@ -140,23 +144,19 @@ class MainDashboardScreen extends StatelessWidget {
             Container(
               padding: EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: Color(0xFFFFFFFF).withOpacity(0.15),
+                color: Theme.of(context).primaryColor.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.construction_rounded,
-                color: Color(0xFFFFFFFF),
+                color: Theme.of(context).colorScheme.secondary,
                 size: 18,
               ),
             ),
             SizedBox(width: 12),
             Text(
               'Feature coming soon!',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
             ),
           ],
         ),
@@ -176,11 +176,11 @@ class MainDashboardScreen extends StatelessWidget {
       opacity: comingSoon ? 0.75 : 1.0,
       child: Container(
         decoration: BoxDecoration(
-          color: Color(0xFF2A2F3F),
+          color: Theme.of(context).cardTheme.color,
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.1) ?? Colors.grey.withOpacity(0.2),
               blurRadius: 10,
               spreadRadius: 2,
               offset: Offset(0, 4),
@@ -192,41 +192,37 @@ class MainDashboardScreen extends StatelessWidget {
           child: InkWell(
             onTap: onTap,
             borderRadius: BorderRadius.circular(24),
-            highlightColor: Color(0xFF4CAF50).withOpacity(0.05),
-            splashColor: Color(0xFF4CAF50).withOpacity(0.1),
+            highlightColor: Theme.of(context).primaryColor.withOpacity(0.05),
+            splashColor: Theme.of(context).primaryColor.withOpacity(0.1),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
                   padding: EdgeInsets.all(18),
                   decoration: BoxDecoration(
-                    color: Color(0xFF4CAF50).withOpacity(0.1),
+                    color: Theme.of(context).primaryColor.withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     icon,
                     size: 36,
-                    color: Color(0xFF4CAF50),
+                    color: Theme.of(context).primaryColor,
                   ),
                 ),
                 SizedBox(height: 12),
                 Text(
                   title,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.5,
-                  ),
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 16, letterSpacing: 0.5),
                 ),
                 if (subtitle != null && !comingSoon) ...[
                   SizedBox(height: 4),
                   Text(
                     subtitle,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.5),
+                      color: Theme.of(context).colorScheme.secondary.withOpacity(0.8),
                       fontSize: 11,
-                      fontWeight: FontWeight.w400,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.3,
                     ),
                   ),
                 ],
@@ -236,10 +232,10 @@ class MainDashboardScreen extends StatelessWidget {
                   Text(
                     'Coming Soon!',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.65),
+                      color: Theme.of(context).colorScheme.secondary,
                       fontSize: 11,
-                      fontWeight: FontWeight.w400,
-                      letterSpacing: 0.2,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.3,
                     ),
                   ),
                 ],

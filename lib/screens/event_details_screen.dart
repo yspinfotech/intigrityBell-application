@@ -27,10 +27,10 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Color(0xFF2A2F3F),
-        title: Text('Delete Event', style: TextStyle(color: Colors.white)),
+        backgroundColor: Theme.of(context).cardColor,
+        title: Text('Delete Event', style: Theme.of(context).textTheme.titleLarge),
         content: Text('Are you sure you want to delete this event?', 
-            style: TextStyle(color: Colors.white70)),
+            style: Theme.of(context).textTheme.bodyMedium),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -55,15 +55,15 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF1A1E2B),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Color(0xFF1A1E2B),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.bodyLarge?.color),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text('Event Details', style: TextStyle(color: Colors.white)),
+        title: Text('Event Details', style: Theme.of(context).textTheme.titleLarge),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -74,32 +74,28 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
               // Title
               Text(
                 _event.title,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 24),
               ),
               SizedBox(height: 20),
               // Date and Time
               Container(
                 padding: EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Color(0xFF2A2F3F),
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.calendar_today, color: Color(0xFF2ECC71)),
+                        Icon(Icons.calendar_today, color: Theme.of(context).primaryColor),
                         SizedBox(width: 12),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Date', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                            Text('Date', style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.5), fontSize: 12)),
                             Text(_event.dateString, 
-                              style: TextStyle(color: Colors.white, fontSize: 16)),
+                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 16)),
                           ],
                         ),
                       ],
@@ -107,14 +103,14 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                     SizedBox(height: 16),
                     Row(
                       children: [
-                        Icon(Icons.access_time, color: Color(0xFF2ECC71)),
+                        Icon(Icons.access_time, color: Theme.of(context).primaryColor),
                         SizedBox(width: 12),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Time', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                            Text('Time', style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.5), fontSize: 12)),
                             Text(_event.timeRange,
-                              style: TextStyle(color: Colors.white, fontSize: 16)),
+                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontSize: 16)),
                           ],
                         ),
                       ],
@@ -124,11 +120,15 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
               ),
               // Description Section
               Text('Description', 
-                style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
               Text(
                 _event.description,
-                style: TextStyle(color: Colors.white70, fontSize: 14, height: 1.5),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                      fontSize: 14,
+                      height: 1.5,
+                    ),
               ),
               const SizedBox(height: 20),
               
@@ -138,30 +138,30 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                    Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF2ECC71).withOpacity(0.1),
+                      color: Theme.of(context).primaryColor.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFF2ECC71).withOpacity(0.3)),
+                      border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.3)),
                     ),
                     child: Text(
                       _event.type.toUpperCase(),
-                      style: const TextStyle(color: Color(0xFF2ECC71), fontSize: 12, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 12, fontWeight: FontWeight.bold),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.blueAccent.withOpacity(0.1),
+                      color: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
+                      border: Border.all(color: Theme.of(context).colorScheme.secondary.withOpacity(0.3)),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.music_note, color: Colors.blueAccent, size: 14),
+                        Icon(Icons.music_note, color: Theme.of(context).colorScheme.secondary, size: 14),
                         const SizedBox(width: 4),
                         Text(
                           _event.sound.startsWith('content://') ? 'System Ringtone' : 'Default Alarm',
-                          style: const TextStyle(color: Colors.blueAccent, fontSize: 12, fontWeight: FontWeight.bold),
+                          style: TextStyle(color: Theme.of(context).colorScheme.secondary, fontSize: 12, fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -170,7 +170,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                     const SizedBox(width: 12),
                     Text(
                       'By: ${_event.createdBy}',
-                      style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 13),
+                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.5), fontSize: 13),
                     ),
                   ],
                 ],
@@ -194,8 +194,8 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                       icon: Icon(Icons.edit),
                       label: Text('Edit'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF2ECC71),
-                        padding: EdgeInsets.symmetric(vertical: 12),
+                        backgroundColor: Theme.of(context).primaryColor,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),

@@ -6,15 +6,15 @@ class StatsDashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF1A1E2B),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Color(0xFF1A1E2B),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).iconTheme.color),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text('Stats Dashboard', style: TextStyle(color: Colors.white)),
+        title: Text('Stats Dashboard', style: Theme.of(context).textTheme.titleLarge),
       ),
       body: Consumer<TaskProvider>(
         builder: (context, taskProvider, _) {
@@ -30,7 +30,7 @@ class StatsDashboardScreen extends StatelessWidget {
                       child: _StatCard(
                         title: 'Completed Tasks',
                         value: '+${taskProvider.completedCount}',
-                        color: Color(0xFF2ECC71),
+                        color: Theme.of(context).primaryColor,
                         icon: Icons.check_circle,
                       ),
                     ),
@@ -50,7 +50,7 @@ class StatsDashboardScreen extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Color(0xFF2A2F3F),
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Column(
@@ -58,11 +58,7 @@ class StatsDashboardScreen extends StatelessWidget {
                     children: [
                       Text(
                         'Productivity Score',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 16),
                       ),
                       SizedBox(height: 16),
                       Row(
@@ -71,7 +67,7 @@ class StatsDashboardScreen extends StatelessWidget {
                           Text(
                             '${taskProvider.productivityScore.toStringAsFixed(0)}%',
                             style: TextStyle(
-                              color: Color(0xFF2ECC71),
+                              color: Theme.of(context).primaryColor,
                               fontSize: 32,
                               fontWeight: FontWeight.bold,
                             ),
@@ -83,8 +79,8 @@ class StatsDashboardScreen extends StatelessWidget {
                               child: LinearProgressIndicator(
                                 value: taskProvider.productivityScore / 100,
                                 minHeight: 6,
-                                backgroundColor: Colors.grey[800],
-                                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2ECC71)),
+                                backgroundColor: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.1),
+                                valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
                               ),
                             ),
                           ),
@@ -97,17 +93,13 @@ class StatsDashboardScreen extends StatelessWidget {
                 // Chart (Weekly)
                 Text(
                   'Weekly Progress',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 16),
                 ),
                 SizedBox(height: 12),
                 Container(
                   padding: EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Color(0xFF2A2F3F),
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Column(
@@ -133,7 +125,7 @@ class StatsDashboardScreen extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Color(0xFF2A2F3F),
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Row(
@@ -155,11 +147,7 @@ class StatsDashboardScreen extends StatelessWidget {
                         children: [
                           Text(
                             '15 Days Strong!',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 16),
                           ),
                           Text(
                             'Gamification UI',
@@ -200,7 +188,7 @@ class _StatCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Color(0xFF2A2F3F),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -244,7 +232,7 @@ class _BarChart extends StatelessWidget {
           width: 30,
           height: value,
           decoration: BoxDecoration(
-            color: Color(0xFF2ECC71),
+            color: Theme.of(context).primaryColor,
             borderRadius: BorderRadius.circular(4),
           ),
         ),

@@ -25,9 +25,10 @@ class _EventScreenState extends State<EventScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bgColor = Theme.of(context).scaffoldBackgroundColor;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDarkMode ? const Color(0xFF1A1E2B) : const Color(0xFFF5F7FA);
-    final textColor = isDarkMode ? Colors.white : Colors.black87;
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
+    final subtitleColor = Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6) ?? Colors.grey;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -39,8 +40,8 @@ class _EventScreenState extends State<EventScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'System Noticboard',
-          style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold),
+          'System Noticeboard',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 20),
         ),
         centerTitle: true,
       ),
@@ -49,7 +50,7 @@ class _EventScreenState extends State<EventScreen> {
           final events = eventProvider.systemEvents;
 
           if (eventProvider.isLoading && events.isEmpty) {
-            return const Center(child: CircularProgressIndicator(color: Color(0xFF2ECC71)));
+            return Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor));
           }
 
           if (events.isEmpty) {
@@ -109,13 +110,13 @@ class _EventScreenState extends State<EventScreen> {
         break;
       case 'notice':
       default:
-        typeColor = const Color(0xFF2ECC71);
+        typeColor = Theme.of(context).primaryColor;
         typeIcon = Icons.info_outline_rounded;
         break;
     }
 
-    final cardColor = isDarkMode ? const Color(0xFF2A2F3F) : Colors.white;
-    final textColor = isDarkMode ? Colors.white : Colors.black87;
+    final cardColor = Theme.of(context).cardColor;
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -152,11 +153,7 @@ class _EventScreenState extends State<EventScreen> {
                     children: [
                       Text(
                         event.title,
-                        style: TextStyle(
-                          color: textColor,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 16),
                       ),
                       Text(
                         event.type.toUpperCase(),

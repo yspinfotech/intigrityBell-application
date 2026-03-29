@@ -14,15 +14,15 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF1A1E2B),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Color(0xFF1A1E2B),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).iconTheme.color),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text('User Profile', style: TextStyle(color: Colors.white)),
+        title: Text('User Profile', style: Theme.of(context).textTheme.titleLarge),
       ),
       body: Consumer<UserProvider>(
         builder: (context, userProvider, _) {
@@ -30,7 +30,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
           if (user == null) {
             return Center(
-              child: Text('No user logged in', style: TextStyle(color: Colors.white)),
+              child: Text('No user logged in', style: Theme.of(context).textTheme.bodyLarge),
             );
           }
 
@@ -44,7 +44,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   width: 100,
                   height: 100,
                   decoration: BoxDecoration(
-                    color: Color(0xFF2ECC71),
+                    color: Theme.of(context).primaryColor,
                     borderRadius: BorderRadius.circular(50),
                   ),
                   child: Center(
@@ -62,34 +62,19 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 // User Info
                 Text(
                   user.name,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 24),
                 ),
                 SizedBox(height: 4),
                 Text(
                   user.email,
-                  style: TextStyle(
-                    color: Colors.grey[400],
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6),
                     fontSize: 14,
                   ),
                 ),
                 SizedBox(height: 30),
                 // Settings Section
-                _SettingsTile(
-                  icon: Icons.notifications,
-                  title: 'Notifications',
-                  subtitle: 'Manage notification settings',
-                  trailing: Switch(
-                    value: user.notificationsEnabled,
-                    onChanged: (value) {
-                      userProvider.updateNotificationSettings(value);
-                    },
-                    activeColor: Color(0xFF2ECC71),
-                  ),
-                ),
+
                 // SizedBox(height: 12),
                 // _SettingsTile(
                 //   icon: Icons.dark_mode,
@@ -105,13 +90,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 //     activeColor: Color(0xFF2ECC71),
                 //   ),
                 // ),
-                SizedBox(height: 12),
-                _SettingsTile(
-                  icon: Icons.person,
-                  title: 'Account',
-                  subtitle: 'Edit account details',
-                  onTap: () {},
-                ),
+
                 SizedBox(height: 12),
                 _SettingsTile(
                   icon: Icons.help,
@@ -129,13 +108,13 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       Navigator.pushReplacementNamed(context, '/login');
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
+                      backgroundColor: Theme.of(context).primaryColor,
                       padding: EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: Text(
+                    child: const Text(
                       'Logout',
                       style: TextStyle(
                         color: Colors.white,
@@ -173,12 +152,12 @@ class _SettingsTile extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Color(0xFF2A2F3F),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          Icon(icon, color: Color(0xFF2ECC71), size: 24),
+          Icon(icon, color: Theme.of(context).primaryColor, size: 24),
           SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -186,17 +165,13 @@ class _SettingsTile extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 14),
                 ),
                 SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: TextStyle(
-                    color: Colors.grey[400],
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6),
                     fontSize: 12,
                   ),
                 ),

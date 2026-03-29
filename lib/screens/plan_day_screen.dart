@@ -98,29 +98,29 @@ class _PlanDayScreenState extends State<PlanDayScreen> {
             left: 20,
             right: 20,
           ),
-          decoration: const BoxDecoration(
-            color: Color(0xFF1A1E2B),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+               Text(
                 'New Daily Plan',
-                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 20),
               TextField(
                 controller: _titleController,
                 decoration: InputDecoration(
                   hintText: 'What are you planning?',
-                  hintStyle: TextStyle(color: Colors.grey[600]),
+                  hintStyle: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.4)),
                   filled: true,
-                  fillColor: const Color(0xFF2A2F3F),
+                  fillColor: Theme.of(context).scaffoldBackgroundColor,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                 ),
-                style: const TextStyle(color: Colors.white),
+                style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
               ),
               const SizedBox(height: 12),
               TextField(
@@ -128,12 +128,12 @@ class _PlanDayScreenState extends State<PlanDayScreen> {
                 maxLines: 2,
                 decoration: InputDecoration(
                   hintText: 'Add some details...',
-                  hintStyle: TextStyle(color: Colors.grey[600]),
+                  hintStyle: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.4)),
                   filled: true,
-                  fillColor: const Color(0xFF2A2F3F),
+                  fillColor: Theme.of(context).scaffoldBackgroundColor,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                 ),
-                style: const TextStyle(color: Colors.white),
+                style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
               ),
               const SizedBox(height: 20),
               Row(
@@ -165,7 +165,7 @@ class _PlanDayScreenState extends State<PlanDayScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: _isRecording ? Colors.red : Colors.blue,
+                        color: _isRecording ? Colors.red : Theme.of(context).primaryColor,
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -194,7 +194,7 @@ class _PlanDayScreenState extends State<PlanDayScreen> {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
+                      backgroundColor: Theme.of(context).primaryColor,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     child: const Text('Save Plan'),
@@ -212,14 +212,14 @@ class _PlanDayScreenState extends State<PlanDayScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1E2B),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1E2B),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
-        title: const Text('My Daily Plans', style: TextStyle(color: Colors.white)),
+        title: Text('My Daily Plans', style: Theme.of(context).textTheme.titleLarge),
         actions: [
           IconButton(
-            icon: const Icon(Icons.calendar_month, color: Colors.white),
+            icon: Icon(Icons.calendar_month, color: Theme.of(context).iconTheme.color),
             onPressed: () async {
               final picked = await showDatePicker(
                 context: context,
@@ -236,7 +236,7 @@ class _PlanDayScreenState extends State<PlanDayScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddPlanModal,
-        backgroundColor: Colors.blue,
+        backgroundColor: Theme.of(context).primaryColor,
         child: const Icon(Icons.add),
       ),
       body: Consumer<PlanDayProvider>(
@@ -268,7 +268,7 @@ class _PlanDayScreenState extends State<PlanDayScreen> {
                 margin: const EdgeInsets.only(bottom: 16),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2A2F3F),
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -276,21 +276,19 @@ class _PlanDayScreenState extends State<PlanDayScreen> {
                     Checkbox(
                       value: plan.isCompleted,
                       onChanged: (_) => provider.togglePlanStatus(plan.id),
-                      activeColor: const Color(0xFF2ECC71),
+                      activeColor: Theme.of(context).primaryColor,
                     ),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            plan.title,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              decoration: plan.isCompleted ? TextDecoration.lineThrough : null,
+                            Text(
+                              plan.title,
+                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                fontSize: 16,
+                                decoration: plan.isCompleted ? TextDecoration.lineThrough : null,
+                              ),
                             ),
-                          ),
                           if (plan.description.isNotEmpty)
                             Text(
                               plan.description,
@@ -301,7 +299,7 @@ class _PlanDayScreenState extends State<PlanDayScreen> {
                     ),
                     if (plan.voiceNotePath != null)
                       IconButton(
-                        icon: const Icon(Icons.play_circle_fill, color: Colors.blue),
+                        icon: Icon(Icons.play_circle_fill, color: Theme.of(context).primaryColor),
                         onPressed: () => _playVoiceNote(plan.voiceNotePath!),
                       ),
                     IconButton(

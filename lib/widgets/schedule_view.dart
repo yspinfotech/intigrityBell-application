@@ -127,9 +127,6 @@ class ScheduleView extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF2A2F3F),
         borderRadius: BorderRadius.circular(12),
-        border: Border(
-          left: BorderSide(color: color, width: 4),
-        ),
       ),
       child: ListTile(
         onTap: () {

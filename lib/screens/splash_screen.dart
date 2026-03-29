@@ -18,7 +18,7 @@ class _SplashScreenState extends State<SplashScreen> {
     // Navigate to home or login after 3 seconds
     Timer(Duration(seconds: 3), () async {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
-      
+
       // Attempt auto-login with timeout to avoid hang
       try {
         await userProvider.tryAutoLogin().timeout(Duration(seconds: 4));
@@ -37,7 +37,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF1A1E2B), // Dark blue-black background
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -61,53 +61,36 @@ class _SplashScreenState extends State<SplashScreen> {
                 ],
               ),
             ),
-            
+
             // Main content - centered vertically
             Expanded(
               child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    TweenAnimationBuilder(
-                      tween: Tween<double>(begin: 0, end: 1),
-                      duration: const Duration(seconds: 2),
-                      builder: (context, double value, child) {
-                        return Opacity(
-                          opacity: value,
-                          child: child,
-                        );
-                      },
-                      child: Image.asset(
-                        'assets/images/logo.png',
-                        height: 180,
-                        fit: BoxFit.contain,
-                      ),
+                child: TweenAnimationBuilder(
+                  tween: Tween<double>(begin: 0, end: 1),
+                  duration: const Duration(seconds: 2),
+                  builder: (context, double value, child) {
+                    return Opacity(opacity: value, child: child);
+                  },
+                  child: Center(
+                    child: Image.asset(
+                      'assets/images/logo.png',
+                      height: 200,
+                      fit: BoxFit.contain,
                     ),
-                    const SizedBox(height: 40),
-                    const CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF6C63FF)),
-                      strokeWidth: 3,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Loading...',
-                      style: TextStyle(
-                        color: Colors.grey[400],
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
-            
+
             // Bottom footer text
             Padding(
               padding: const EdgeInsets.only(bottom: 40),
               child: Text(
-                'Developed by YSPinfotech Team',
+                'Developed by YSP Infotech Pvt.Ltd.',
                 style: TextStyle(
-                  color: Colors.grey[500],
+                  color: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.color?.withOpacity(0.5),
                   fontSize: 12,
                   letterSpacing: 1,
                 ),

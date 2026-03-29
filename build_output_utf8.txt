@@ -1,0 +1,121 @@
+﻿Launching lib\main.dart on CPH2381 in debug mode...
+Running Gradle task 'assembleDebug'...                          
+flutter : lib/screens/add_not
+e_screen.dart:720:43: Error: 
+Not a constant expression.
+At line:1 char:1
++ flutter run -d 754b3d6a > 
+build_output.txt 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo           
+   : NotSpecified: (lib/scr  
+  eens/add...ant expressio   
+ n.:String) [], RemoteExc    
+eption
+    + FullyQualifiedErrorId  
+   : NativeCommandError
+ 
+                          
+color: Theme.of(context).prim
+aryColor,
+                             
+             ^^^^^^^
+lib/screens/add_note_screen.d
+art:720:40: Error: Method 
+invocation is not a constant 
+expression.
+                          
+color: Theme.of(context).prim
+aryColor,
+                             
+          ^^
+lib/screens/note_list_screen.
+dart:96:58: Error: The 
+getter 'isDarkMode' isn't 
+defined for the type 
+'_NoteListScreenState'.
+ - '_NoteListScreenState' is 
+from 'package:integrity/scree
+ns/note_list_screen.dart' ('l
+ib/screens/note_list_screen.d
+art').
+Try correcting the name to 
+the name of an existing 
+getter, or defining a getter 
+or field named 'isDarkMode'.
+                    return 
+_buildNoteCard(context, 
+note, isDarkMode);
+                             
+                            
+^^^^^^^^^^
+lib/screens/notifications_scr
+een.dart:126:26: Error: The 
+getter 'context' isn't 
+defined for the type 
+'NotificationsScreen'.
+ - 'NotificationsScreen' is 
+from 'package:integrity/scree
+ns/notifications_screen.dart'
+ ('lib/screens/notifications_
+screen.dart').
+Try correcting the name to 
+the name of an existing 
+getter, or defining a getter 
+or field named 'context'.
+        color = Theme.of(cont
+ext).primaryColor;
+                         
+^^^^^^^
+lib/screens/event_screen.dart
+:88:56: Error: The getter 
+'isDarkMode' isn't defined 
+for the type 
+'_EventScreenState'.
+ - '_EventScreenState' is 
+from 'package:integrity/scree
+ns/event_screen.dart' ('lib/s
+creens/event_screen.dart').
+Try correcting the name to 
+the name of an existing 
+getter, or defining a getter 
+or field named 'isDarkMode'.
+                return 
+_buildEventCard(context, 
+event, isDarkMode);
+                             
+                          
+^^^^^^^^^^
+Target 
+kernel_snapshot_program 
+failed: Exception
+
+
+FAILURE: Build failed with 
+an exception.
+
+* What went wrong:
+Execution failed for task ':a
+pp:compileFlutterBuildDebug'.
+> Process 'command 'C:\flutte
+r\bin\flutter.bat'' finished 
+with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace 
+option to get the stack 
+trace.
+> Run with --info or --debug 
+option to get more log 
+output.
+> Run with --scan to get 
+full insights.
+> Get more help at 
+https://help.gradle.org.
+
+BUILD FAILED in 8s
+Running Gradle task 'assembleDebug'...                              8.8s
+Error: Gradle task 
+assembleDebug failed with 
+exit code 1

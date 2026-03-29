@@ -470,7 +470,22 @@ class NotificationService {
       final int baseId = event.notificationId ?? (event.id.hashCode % 100000000).abs();
 
       // FEATURE 1: Support MULTIPLE reminders
-      final List<int> reminders = event.reminders.isNotEmpty ? event.reminders : [0]; // Default to on-time if empty
+      List<int> reminders = event.reminders.isNotEmpty ? event.reminders : [5]; // Default to 5 mins before if empty
+      
+      // FIX 2: SAFETY CHECK: If 5 mins before is past, default to on-time (0 mins)
+      if (event.reminders.isEmpty) {
+        final DateTime eventDateTime = DateTime(
+          event.date.year, event.date.month, event.date.day, hour, minute
+        );
+        final DateTime alarmTime = eventDateTime.subtract(const Duration(minutes: 5));
+        
+        if (alarmTime.isBefore(DateTime.now())) {
+          reminders = [0];
+          debugPrint('⏰ [Safety Fallback] 5 min alarm has passed, scheduling for event time ($eventDateTime)');
+        } else {
+          debugPrint('⏰ [Default Alarm] Scheduled 5 mins before: $alarmTime');
+        }
+      }
 
       if (event.isRepeating && event.repeatDays.isNotEmpty) {
         // Schedule for each selected day
@@ -544,6 +559,7 @@ class NotificationService {
         'triggerTime': cleanTime.millisecondsSinceEpoch,
         'title': event.title,
         'soundUri': event.sound,
+        'isRepeat': isRepeat,
       });
 
       _scheduledNotifications[id] = {
@@ -589,7 +605,8 @@ class NotificationService {
             'alarmId': uniqueId,
             'triggerTime': alarmTime.millisecondsSinceEpoch,
             'title': '📋 ${offset == 0 ? 'DUE NOW' : '$offset min before'}: ${task.title}',
-            'soundUri': 'assets/alarm.mp3', // Default task alarm sound
+            'soundUri': 'alarm', // Use the 'alarm' asset defined in AlarmService.kt
+            'isRepeat': false,
           });
 
           _scheduledNotifications[uniqueId] = {

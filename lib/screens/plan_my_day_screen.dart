@@ -26,20 +26,20 @@ class _PlanMyDayScreenState extends State<PlanMyDayScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1E2B),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1E2B),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.bodyLarge?.color),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Plan My Day', style: TextStyle(color: Colors.white)),
+        title: Text('Plan My Day', style: Theme.of(context).textTheme.titleLarge),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.pushNamed(context, '/add-event'),
-        backgroundColor: Colors.blue,
-        child: const Icon(Icons.add),
+        backgroundColor: Theme.of(context).primaryColor,
+        child: const Icon(Icons.add, color: Colors.white),
       ),
       body: Consumer<TaskProvider>(
         builder: (context, taskProvider, _) {
@@ -58,7 +58,8 @@ class _PlanMyDayScreenState extends State<PlanMyDayScreen> {
                     icon: const Icon(Icons.auto_awesome),
                     label: const Text('Auto Plan My Day'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
+                      backgroundColor: Theme.of(context).primaryColor,
+                      foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -94,7 +95,7 @@ class _PlanMyDayScreenState extends State<PlanMyDayScreen> {
                           child: Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF2A2F3F),
+                              color: Theme.of(context).cardColor,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Row(
@@ -107,12 +108,12 @@ class _PlanMyDayScreenState extends State<PlanMyDayScreen> {
                                   },
                                   fillColor: MaterialStateProperty.resolveWith((states) {
                                     if (states.contains(MaterialState.selected)) {
-                                      return const Color(0xFF2ECC71);
+                                      return Theme.of(context).primaryColor;
                                     }
                                     return Colors.transparent;
                                   }),
-                                  side: const BorderSide(
-                                    color: Color(0xFF2ECC71),
+                                  side: BorderSide(
+                                    color: Theme.of(context).primaryColor,
                                     width: 2,
                                   ),
                                 ),
@@ -123,20 +124,19 @@ class _PlanMyDayScreenState extends State<PlanMyDayScreen> {
                                     children: [
                                       Text(
                                         task.title,
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
+                                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                                           decoration: task.isCompleted 
                                             ? TextDecoration.lineThrough 
                                             : null,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
                                         ),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
                                         task.timeString,
-                                        style: TextStyle(
-                                          color: Colors.grey[400],
+                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                          color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6),
                                           fontSize: 12,
                                         ),
                                       ),
@@ -179,11 +179,11 @@ class _PlanMyDayScreenState extends State<PlanMyDayScreen> {
   Color _getPriorityColor(String priority) {
     switch (priority.toLowerCase()) {
       case 'high':
-        return Colors.red;
+        return Colors.redAccent;
       case 'medium':
-        return Colors.orange;
+        return Colors.orangeAccent;
       case 'low':
-        return Colors.green;
+        return Theme.of(context).primaryColor;
       default:
         return Colors.grey;
     }

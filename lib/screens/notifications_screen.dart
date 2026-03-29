@@ -12,35 +12,35 @@ class NotificationsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1E2B),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1A1E2B),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).iconTheme.color),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Notifications', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: Text('Notifications', style: Theme.of(context).textTheme.titleLarge),
       ),
       body: Consumer2<TaskProvider, EventProvider>(
         builder: (context, taskProvider, eventProvider, _) {
-          final notifications = _buildNotifications(taskProvider, eventProvider);
+          final notifications = _buildNotifications(context, taskProvider, eventProvider);
 
           if (notifications.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.notifications_none, size: 64, color: Colors.white.withOpacity(0.2)),
+                  Icon(Icons.notifications_none, size: 64, color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.2)),
                   const SizedBox(height: 16),
                   Text(
                     'No notifications yet',
-                    style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 16),
+                    style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.5), fontSize: 16),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Task deadlines and events will appear here',
-                    style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 12),
+                    style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.3), fontSize: 12),
                   ),
                 ],
               ),
@@ -56,24 +56,24 @@ class NotificationsScreen extends StatelessWidget {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              if (overdue.isNotEmpty) ...[
+               if (overdue.isNotEmpty) ...[
                 _sectionHeader('🔴 Overdue Tasks', Colors.redAccent),
-                ...overdue.map((n) => _notificationCard(n)),
+                ...overdue.map((n) => _notificationCard(n, context)),
                 const SizedBox(height: 12),
               ],
-              if (today.isNotEmpty) ...[
+               if (today.isNotEmpty) ...[
                 _sectionHeader('🟡 Due Today', Colors.orangeAccent),
-                ...today.map((n) => _notificationCard(n)),
+                ...today.map((n) => _notificationCard(n, context)),
                 const SizedBox(height: 12),
               ],
-              if (upcoming.isNotEmpty) ...[
-                _sectionHeader('🟢 Upcoming', const Color(0xFF2ECC71)),
-                ...upcoming.map((n) => _notificationCard(n)),
+               if (upcoming.isNotEmpty) ...[
+                _sectionHeader('🟢 Upcoming', Theme.of(context).primaryColor),
+                ...upcoming.map((n) => _notificationCard(n, context)),
                 const SizedBox(height: 12),
               ],
-              if (events.isNotEmpty) ...[
+               if (events.isNotEmpty) ...[
                 _sectionHeader('📢 Events & Notices', Colors.blueAccent),
-                ...events.map((n) => _notificationCard(n)),
+                ...events.map((n) => _notificationCard(n, context)),
               ],
             ],
           );
@@ -83,7 +83,7 @@ class NotificationsScreen extends StatelessWidget {
   }
 
   List<Map<String, dynamic>> _buildNotifications(
-      TaskProvider taskProvider, EventProvider eventProvider) {
+      BuildContext context, TaskProvider taskProvider, EventProvider eventProvider) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final notifications = <Map<String, dynamic>>[];
@@ -123,7 +123,7 @@ class NotificationsScreen extends StatelessWidget {
         timeLabel = 'Due at ${DateFormat('h:mm a').format(task.scheduledDate)}';
       } else {
         urgency = 'upcoming';
-        color = const Color(0xFF2ECC71);
+        color = Theme.of(context).primaryColor;
         icon = Icons.event_available_rounded;
         final daysLeft = taskDay.difference(today).inDays;
         timeLabel = daysLeft == 1 ? 'Tomorrow' : 'In $daysLeft days';
@@ -196,7 +196,7 @@ class NotificationsScreen extends StatelessWidget {
     );
   }
 
-  Widget _notificationCard(Map<String, dynamic> notification) {
+  Widget _notificationCard(Map<String, dynamic> notification, BuildContext context) {
     final color = notification['color'] as Color;
     final String urgency = notification['urgency'] ?? '';
 
@@ -212,7 +212,7 @@ class NotificationsScreen extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF2A2F3F),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(14),
         border: urgency == 'overdue'
             ? Border.all(color: Colors.redAccent.withOpacity(0.4), width: 1)
@@ -238,11 +238,7 @@ class NotificationsScreen extends StatelessWidget {
                     Expanded(
                       child: Text(
                         notification['title'] as String,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 14),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -269,7 +265,7 @@ class NotificationsScreen extends StatelessWidget {
                   const SizedBox(height: 3),
                   Text(
                     notification['description'] as String,
-                    style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                    style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6), fontSize: 12),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),

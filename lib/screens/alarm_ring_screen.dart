@@ -47,7 +47,7 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> with SingleTickerProv
     final now = DateTime.now();
     
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1E2B),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Container(
         width: double.infinity,
         decoration: BoxDecoration(
@@ -55,9 +55,9 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> with SingleTickerProv
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              const Color(0xFF1A1E2B),
-              const Color(0xFF2ECC71).withOpacity(0.1),
-              const Color(0xFF1A1E2B),
+              Theme.of(context).scaffoldBackgroundColor,
+              Theme.of(context).primaryColor.withOpacity(0.1),
+              Theme.of(context).scaffoldBackgroundColor,
             ],
           ),
         ),
@@ -75,19 +75,19 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> with SingleTickerProv
                 child: Container(
                   padding: const EdgeInsets.all(40),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2ECC71).withOpacity(0.2),
+                    color: Theme.of(context).primaryColor.withOpacity(0.2),
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF2ECC71).withOpacity(0.3),
+                        color: Theme.of(context).primaryColor.withOpacity(0.3),
                         blurRadius: 40,
                         spreadRadius: 10,
                       )
                     ],
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.alarm,
-                    color: Color(0xFF2ECC71),
+                    color: Theme.of(context).primaryColor,
                     size: 80,
                   ),
                 ),
@@ -98,8 +98,8 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> with SingleTickerProv
               // Current Time
               Text(
                 DateFormat('hh:mm').format(now),
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                   fontSize: 80,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 4,
@@ -107,8 +107,8 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> with SingleTickerProv
               ),
               Text(
                 DateFormat('a').format(now),
-                style: const TextStyle(
-                  color: Colors.white70,
+                style: TextStyle(
+                  color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
                   fontSize: 24,
                   fontWeight: FontWeight.w500,
                 ),
@@ -122,8 +122,8 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> with SingleTickerProv
                 child: Text(
                   widget.title.isEmpty ? "ALARM" : widget.title.toUpperCase(),
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
                     fontSize: 28,
                     fontWeight: FontWeight.w300,
                     letterSpacing: 2,
@@ -143,12 +143,12 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> with SingleTickerProv
                       height: 80,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(40),
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFE74C3C), Color(0xFFC0392B)],
+                        gradient: LinearGradient(
+                          colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withOpacity(0.8)],
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFFE74C3C).withOpacity(0.4),
+                            color: Theme.of(context).primaryColor.withOpacity(0.4),
                             blurRadius: 20,
                             offset: const Offset(0, 10),
                           )
@@ -184,10 +184,10 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> with SingleTickerProv
                         _notificationService.stopAlarmSound(widget.id);
                         Navigator.of(context).pushReplacementNamed('/home');
                       },
-                      child: const Text(
+                      child: Text(
                         "SNOOZE",
                         style: TextStyle(
-                          color: Colors.white54,
+                          color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.54),
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
                         ),

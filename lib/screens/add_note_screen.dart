@@ -258,7 +258,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
   void _showScanOptions() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF2A2F3F),
+      backgroundColor: Theme.of(context).cardColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -279,16 +279,16 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
             const Text('Scan Document', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             ListTile(
-              leading: const Icon(Icons.camera_alt_rounded, color: Color(0xFF2ECC71)),
-              title: const Text('Take a Photo', style: TextStyle(color: Colors.white)),
+              leading: Icon(Icons.camera_alt_rounded, color: Theme.of(context).primaryColor),
+              title: Text('Take a Photo', style: Theme.of(context).textTheme.bodyLarge),
               onTap: () {
                 Navigator.pop(context);
                 _scanDocument(ImageSource.camera);
               },
             ),
             ListTile(
-              leading: const Icon(Icons.photo_library_rounded, color: Color(0xFF2ECC71)),
-              title: const Text('Choose from Gallery', style: TextStyle(color: Colors.white)),
+              leading: Icon(Icons.photo_library_rounded, color: Theme.of(context).primaryColor),
+              title: Text('Choose from Gallery', style: Theme.of(context).textTheme.bodyLarge),
               onTap: () {
                 Navigator.pop(context);
                 _scanDocument(ImageSource.gallery);
@@ -463,10 +463,10 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          backgroundColor: const Color(0xFF2A2F3F),
+          backgroundColor: Theme.of(context).cardColor,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Text('🤖 Convert to Tasks',
-              style: TextStyle(color: Colors.white, fontSize: 16)),
+          title: Text('🤖 Convert to Tasks',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 16)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -478,13 +478,13 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
               ...taskTitles.asMap().entries.map((entry) {
                 return CheckboxListTile(
                   dense: true,
-                  activeColor: const Color(0xFF2ECC71),
-                  checkColor: Colors.black,
+                  activeColor: Theme.of(context).primaryColor,
+                  checkColor: Colors.white,
                   value: selected[entry.key],
                   onChanged: (v) => setDialogState(() => selected[entry.key] = v!),
                   title: Text(
                     entry.value,
-                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 13),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -499,8 +499,8 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2ECC71),
-                foregroundColor: Colors.black,
+                backgroundColor: Theme.of(context).primaryColor,
+                foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
               onPressed: () {
@@ -560,17 +560,21 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF2A2F3F),
+        backgroundColor: Theme.of(context).cardColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(title, style: const TextStyle(color: Colors.white, fontSize: 16)),
+        title: Text(title, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 16)),
         content: SingleChildScrollView(
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFF1A1E2B),
+              color: Theme.of(context).scaffoldBackgroundColor,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Text(content, style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.5)),
+            child: Text(content, style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                  fontSize: 13,
+                  height: 1.5,
+                )),
           ),
         ),
         actions: [
@@ -580,7 +584,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
               Navigator.pop(ctx);
               _showSnack('Copied to clipboard!');
             },
-            child: const Text('Copy', style: TextStyle(color: Color(0xFF2ECC71))),
+            child: Text('Copy', style: TextStyle(color: Theme.of(context).primaryColor)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -588,8 +592,8 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2ECC71),
-              foregroundColor: Colors.black,
+              backgroundColor: Theme.of(context).primaryColor,
+              foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () {
@@ -635,7 +639,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? Colors.redAccent : const Color(0xFF2ECC71),
+        backgroundColor: isError ? Colors.redAccent : Theme.of(context).primaryColor,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         duration: const Duration(seconds: 2),
@@ -648,9 +652,9 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDarkMode ? const Color(0xFF1A1E2B) : const Color(0xFFF5F7FA);
-    final cardColor = isDarkMode ? const Color(0xFF2A2F3F) : Colors.white;
-    final textColor = isDarkMode ? Colors.white : Colors.black87;
+    final bgColor = Theme.of(context).scaffoldBackgroundColor;
+    final cardColor = Theme.of(context).cardColor;
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -663,19 +667,19 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
         ),
         title: Text(
           widget.existingNote != null ? 'Edit Note' : 'New Note',
-          style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold),
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 18),
         ),
         actions: [
           // Scan document button
           if (_isScanning)
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
               child: SizedBox(
                 width: 20,
                 height: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: Color(0xFF2ECC71),
+                  color: Theme.of(context).primaryColor,
                 ),
               ),
             )
@@ -687,7 +691,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
             ),
           // Save button
           IconButton(
-            icon: const Icon(Icons.check_rounded, color: Color(0xFF2ECC71), size: 28),
+            icon: Icon(Icons.check_rounded, color: Theme.of(context).primaryColor, size: 28),
             onPressed: _saveNote,
           ),
         ],
@@ -704,16 +708,16 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  color: const Color(0xFF2ECC71).withOpacity(0.15),
+                  color: Theme.of(context).primaryColor.withOpacity(0.15),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const SizedBox(
+                      SizedBox(
                         width: 14,
                         height: 14,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Color(0xFF2ECC71),
+                          color: Theme.of(context).primaryColor,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -723,8 +727,8 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
                             : _aiMode == 'improve'
                                 ? '✍️ Improving writing...'
                                 : '🤖 Extracting tasks...',
-                        style: const TextStyle(
-                          color: Color(0xFF2ECC71),
+                        style: TextStyle(
+                          color: Theme.of(context).primaryColor,
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
                         ),
@@ -753,8 +757,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
                           fontWeight: FontWeight.bold),
                       border: InputBorder.none,
                     ),
-                    style: TextStyle(
-                        color: textColor, fontSize: 24, fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 24),
                   ),
 
                   // Meta row
@@ -768,22 +771,22 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF2ECC71).withOpacity(0.1),
+                          color: Theme.of(context).primaryColor.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: DropdownButton<String>(
                           value: _selectedCategory,
                           underline: const SizedBox(),
-                          icon: const Icon(Icons.arrow_drop_down,
-                              color: Color(0xFF2ECC71), size: 16),
-                          dropdownColor: const Color(0xFF2A2F3F),
+                          icon: Icon(Icons.arrow_drop_down,
+                              color: Theme.of(context).primaryColor, size: 16),
+                          dropdownColor: Theme.of(context).cardColor,
                           onChanged: (val) => setState(() => _selectedCategory = val!),
                           items: _categories
                               .map((c) => DropdownMenuItem(
                                     value: c,
                                     child: Text(c,
-                                        style: const TextStyle(
-                                            fontSize: 12, color: Color(0xFF2ECC71))),
+                                        style: TextStyle(
+                                            fontSize: 12, color: Theme.of(context).primaryColor)),
                                   ))
                               .toList(),
                         ),

@@ -17,9 +17,10 @@ class _NoteListScreenState extends State<NoteListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bgColor = Theme.of(context).scaffoldBackgroundColor;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDarkMode ? const Color(0xFF1A1E2B) : const Color(0xFFF5F7FA);
-    final textColor = isDarkMode ? Colors.white : Colors.black87;
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
+    final subtitleColor = Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6) ?? Colors.grey;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -32,13 +33,13 @@ class _NoteListScreenState extends State<NoteListScreen> {
         ),
         title: Text(
           'Personal Notes',
-          style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold),
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 20),
         ),
         centerTitle: true,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.pushNamed(context, '/add-note'),
-        backgroundColor: const Color(0xFF2ECC71),
+        backgroundColor: Theme.of(context).primaryColor,
         child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
       body: Column(
@@ -49,9 +50,9 @@ class _NoteListScreenState extends State<NoteListScreen> {
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: 'Search notes...',
-                prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                prefixIcon: Icon(Icons.search, color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.5)),
                 filled: true,
-                fillColor: isDarkMode ? const Color(0xFF2A2F3F) : Colors.white,
+                fillColor: Theme.of(context).cardColor,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(15),
                   borderSide: BorderSide.none,
@@ -66,7 +67,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
                 final notes = noteProvider.searchNotes(_searchQuery);
 
                 if (noteProvider.isLoading) {
-                  return const Center(child: CircularProgressIndicator(color: Color(0xFF2ECC71)));
+                  return Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor));
                 }
 
                 if (notes.isEmpty) {
@@ -105,8 +106,8 @@ class _NoteListScreenState extends State<NoteListScreen> {
   }
 
   Widget _buildNoteCard(BuildContext context, Note note, bool isDarkMode) {
-    final cardColor = isDarkMode ? const Color(0xFF2A2F3F) : Colors.white;
-    final textColor = isDarkMode ? Colors.white : Colors.black87;
+    final cardColor = Theme.of(context).cardColor;
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
 
     return GestureDetector(
       onTap: () => Navigator.push(
@@ -141,7 +142,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
                     note.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 16),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 16),
                   ),
                 ),
               ],
@@ -152,7 +153,11 @@ class _NoteListScreenState extends State<NoteListScreen> {
                 note.content,
                 maxLines: 4,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: textColor.withOpacity(0.7), fontSize: 13, height: 1.4),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                      fontSize: 13,
+                      height: 1.4,
+                    ),
               ),
             ),
             const SizedBox(height: 8),

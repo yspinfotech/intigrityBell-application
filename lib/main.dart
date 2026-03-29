@@ -72,24 +72,104 @@ class MyApp extends StatelessWidget {
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) {
           return MaterialApp(
-            title: 'INTIGrity-Bell',
+            title: 'Integrity Bell',
             debugShowCheckedModeBanner: false,
             navigatorKey: navigatorKey,
             theme: ThemeData(
               useMaterial3: true,
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: const Color(0xFF2ECC71),
-                brightness: Brightness.light,
-              ),
               scaffoldBackgroundColor: Colors.white,
+              primaryColor: const Color(0xFFE53935),
+              colorScheme: const ColorScheme.light(
+                primary: Color(0xFFE53935),
+                secondary: Color(0xFF1A237E),
+                surface: Colors.white,
+                background: Colors.white,
+              ),
+              appBarTheme: const AppBarTheme(
+                backgroundColor: Colors.white,
+                foregroundColor: Color(0xFF1A237E),
+                elevation: 0,
+                iconTheme: IconThemeData(color: Color(0xFFE53935)),
+              ),
+              textTheme: const TextTheme(
+                bodyLarge: TextStyle(color: Color(0xFF1A237E)),
+                bodyMedium: TextStyle(color: Color(0xFF1A237E)),
+                titleLarge: TextStyle(
+                  color: Color(0xFF1A237E),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              iconTheme: const IconThemeData(
+                color: Color(0xFFE53935),
+              ),
+              elevatedButtonTheme: ElevatedButtonThemeData(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFE53935),
+                  foregroundColor: Colors.white,
+                ),
+              ),
+              cardTheme: const CardThemeData(
+                color: Colors.white,
+                elevation: 4,
+              ),
+              snackBarTheme: const SnackBarThemeData(
+                backgroundColor: Colors.white,
+                contentTextStyle: TextStyle(color: Color(0xFF1A237E)),
+              ),
+              inputDecorationTheme: const InputDecorationTheme(
+                border: OutlineInputBorder(),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFFE53935)),
+                ),
+              ),
             ),
             darkTheme: ThemeData(
               useMaterial3: true,
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: const Color(0xFF2ECC71),
-                brightness: Brightness.dark,
+              scaffoldBackgroundColor: Colors.white,
+              primaryColor: const Color(0xFFE53935),
+              colorScheme: const ColorScheme.light(
+                primary: Color(0xFFE53935),
+                secondary: Color(0xFF1A237E),
+                surface: Colors.white,
+                background: Colors.white,
               ),
-              scaffoldBackgroundColor: const Color(0xFF1A1E2B),
+              appBarTheme: const AppBarTheme(
+                backgroundColor: Colors.white,
+                foregroundColor: Color(0xFF1A237E),
+                elevation: 0,
+                iconTheme: IconThemeData(color: Color(0xFFE53935)),
+              ),
+              textTheme: const TextTheme(
+                bodyLarge: TextStyle(color: Color(0xFF1A237E)),
+                bodyMedium: TextStyle(color: Color(0xFF1A237E)),
+                titleLarge: TextStyle(
+                  color: Color(0xFF1A237E),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              iconTheme: const IconThemeData(
+                color: Color(0xFFE53935),
+              ),
+              elevatedButtonTheme: ElevatedButtonThemeData(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFE53935),
+                  foregroundColor: Colors.white,
+                ),
+              ),
+              cardTheme: const CardThemeData(
+                color: Colors.white,
+                elevation: 4,
+              ),
+              snackBarTheme: const SnackBarThemeData(
+                backgroundColor: Colors.white,
+                contentTextStyle: TextStyle(color: Color(0xFF1A237E)),
+              ),
+              inputDecorationTheme: const InputDecorationTheme(
+                border: OutlineInputBorder(),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xFFE53935)),
+                ),
+              ),
             ),
             themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
             initialRoute: '/',

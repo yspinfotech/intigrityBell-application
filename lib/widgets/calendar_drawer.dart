@@ -26,7 +26,7 @@ class CalendarDrawer extends StatelessWidget {
                   ),
                   const SizedBox(width: 12),
                   const Text(
-                    'INTIGrity',
+                    'Integrity Bell',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,
@@ -36,51 +36,7 @@ class CalendarDrawer extends StatelessWidget {
                 ],
               ),
             ),
-            const Divider(color: Colors.white12),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-              child: Text(
-                'Calendars',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            _buildFilterItem(
-              context,
-              'Holidays',
-              'holiday',
-              Colors.blueAccent,
-              filters['holiday'] ?? true,
-              eventProvider,
-            ),
-            _buildFilterItem(
-              context,
-              'System Notices',
-              'notice',
-              Colors.orangeAccent,
-              filters['notice'] ?? true,
-              eventProvider,
-            ),
-            _buildFilterItem(
-              context,
-              'Tasks',
-              'task',
-              const Color(0xFF2ECC71),
-              filters['task'] ?? true,
-              eventProvider,
-            ),
-            _buildFilterItem(
-              context,
-              'Local Events',
-              'local',
-              Colors.purpleAccent,
-              filters['local'] ?? true,
-              eventProvider,
-            ),
-            const Divider(color: Colors.white12),
+
             ListTile(
               leading: const Icon(Icons.campaign_outlined, color: Colors.orangeAccent),
               title: const Text('System Noticeboard', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),

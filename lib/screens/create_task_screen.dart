@@ -93,15 +93,15 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                 children: [
                   IconButton(
                     iconSize: 48,
-                    color: _audioService.isRecording ? Colors.red : Colors.blue,
+                    color: _audioService.isRecording ? Colors.redAccent : Theme.of(context).primaryColor,
                     icon: Icon(_audioService.isRecording ? Icons.stop_circle : Icons.mic),
                     onPressed: _toggleRecord,
                   ),
-                  SizedBox(width: 16),
+                  const SizedBox(width: 16),
                   if (_recordedFilePath != null && !_audioService.isRecording)
                     Expanded(child: Text('Audio recorded: ${_recordedFilePath!.split('/').last}')),
                   if (_audioService.isRecording)
-                    Expanded(child: Text('Recording in progress...', style: TextStyle(color: Colors.red))),
+                    const Expanded(child: Text('Recording in progress...', style: TextStyle(color: Colors.redAccent))),
                 ],
               ),
               SizedBox(height: 40),
