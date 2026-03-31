@@ -5,6 +5,7 @@ import 'package:record/record.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:intl/intl.dart';
 import '../models/task_model.dart';
 import '../models/voice_note_model.dart';
 import '../providers/user_provider.dart';
@@ -33,6 +34,11 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
   void initState() {
     super.initState();
     _currentStatus = widget.task.status;
+    
+    // FETCH LATEST: Ensure we have the very latest voice notes/details from the server
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<TaskProvider>(context, listen: false).fetchTasks();
+    });
   }
 
   @override
@@ -214,7 +220,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
           _currentStatus ??= task.status;
 
           final currentUser = userProvider.currentUser;
-          final isAssigned = task.assignedTo == currentUser?.id;
+          final isAssigned = task.assignedTo?.toString() == currentUser?.id?.toString();
           final canSeeConvo = isManager || isAssigned;
 
           return Column(
@@ -552,11 +558,15 @@ class _ChatBubbleState extends State<_ChatBubble> {
     } else {
       String? url = widget.note.audioUrl;
       if (url == null || url.isEmpty) return;
-      if (!url.startsWith('http') && url.startsWith('/')) {
-        url = '${ApiService.baseUrl.replaceAll('/api', '')}$url';
+      
+      if (!url.startsWith('http')) {
+        final serverRoot = ApiService.baseUrl.replaceAll('/api', '');
+        final cleanPath = url.startsWith('/') ? url : '/$url';
+        url = '$serverRoot$cleanPath';
       }
+      
       debugPrint('🎙️ Playing audio from $url');
-      await _player.play(UrlSource(url, mimeType: 'audio/mpeg'));
+      await _player.play(UrlSource(url));
     }
   }
 
@@ -735,6 +745,6 @@ class _ChatBubbleState extends State<_ChatBubble> {
   }
 
   String _formatDateTime(DateTime dt) {
-    return '${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
+    return DateFormat('hh:mm a').format(dt);
   }
 }

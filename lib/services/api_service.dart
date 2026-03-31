@@ -7,17 +7,16 @@ class ApiService {
   /// ─── IMPORTANT: Automatic local host detection for testing.
   /// For Android Emulator → 10.0.2.2
   /// For Web / Desktop / iOS Simulator → 127.0.0.1 or localhost
-  static const String _defaultHost = '192.168.1.36';
+  static const String _defaultHost = '192.168.1.13';
   static const int _serverPort = 8000;
 
-  // static String get baseUrl {
-  //   // 10.0.2.2 is the special alias to your host loopback interface for Android emulators
-  //   if (!kIsWeb && Platform.isAndroid && _defaultHost == '127.0.0.1') {
-  //     return 'http://10.0.2.2:$_serverPort/api';
-  //   }
-  //   return 'http://$_defaultHost:$_serverPort/api';
-  // }
-  static String get baseUrl => 'https://intigrity-bell-backend.vercel.app/api';
+  static String get baseUrl {
+    // 10.0.2.2 is the special alias to your host loopback interface for Android emulators
+    if (!kIsWeb && Platform.isAndroid && _defaultHost == '127.0.0.1') {
+      return 'http://10.0.2.2:$_serverPort/api';
+    }
+    return 'http://$_defaultHost:$_serverPort/api';
+  }
 
   static String? _token;
 
@@ -56,13 +55,20 @@ class ApiService {
   }
 
   // POST
-  static Future<http.Response> post(String endpoint, Map<String, dynamic> body,
-      {String? token}) async {
+  static Future<http.Response> post(
+    String endpoint,
+    Map<String, dynamic> body, {
+    String? token,
+  }) async {
     try {
       final uri = Uri.parse('$baseUrl$endpoint');
       debugPrint('[API POST] $uri');
       final response = await http
-          .post(uri, headers: _buildHeaders(token: token), body: jsonEncode(body))
+          .post(
+            uri,
+            headers: _buildHeaders(token: token),
+            body: jsonEncode(body),
+          )
           .timeout(const Duration(seconds: 15));
       debugPrint('[API POST] ${response.statusCode} $endpoint');
       return response;
@@ -73,13 +79,20 @@ class ApiService {
   }
 
   // PUT
-  static Future<http.Response> put(String endpoint, Map<String, dynamic> body,
-      {String? token}) async {
+  static Future<http.Response> put(
+    String endpoint,
+    Map<String, dynamic> body, {
+    String? token,
+  }) async {
     try {
       final uri = Uri.parse('$baseUrl$endpoint');
       debugPrint('[API PUT] $uri');
       final response = await http
-          .put(uri, headers: _buildHeaders(token: token), body: jsonEncode(body))
+          .put(
+            uri,
+            headers: _buildHeaders(token: token),
+            body: jsonEncode(body),
+          )
           .timeout(const Duration(seconds: 15));
       debugPrint('[API PUT] ${response.statusCode} $endpoint');
       return response;
@@ -97,7 +110,9 @@ class ApiService {
       final response = await http
           .delete(uri, headers: _buildHeaders(token: token))
           .timeout(const Duration(seconds: 15));
-      debugPrint('[API DELETE] ${response.statusCode} $endpoint - ${response.body}');
+      debugPrint(
+        '[API DELETE] ${response.statusCode} $endpoint - ${response.body}',
+      );
       return response;
     } catch (e) {
       debugPrint('[API DELETE ERROR] $endpoint → $e');

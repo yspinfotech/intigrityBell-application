@@ -20,7 +20,6 @@ class _AddEventScreenState extends State<AddEventScreen> {
   final _descriptionController = TextEditingController();
   DateTime _selectedDate = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
   TimeOfDay _startTime = TimeOfDay.now();
-  TimeOfDay _endTime = TimeOfDay.now().replacing(hour: TimeOfDay.now().hour + 1);
   bool _isRepeating = false;
   List<int> _selectedRepeatDays = [];
   List<int> _selectedReminders = []; // Changed to List
@@ -36,7 +35,6 @@ class _AddEventScreenState extends State<AddEventScreen> {
       _descriptionController.text = widget.existingEvent!.description;
       _selectedDate = widget.existingEvent!.date;
       _startTime = widget.existingEvent!.startTime ?? TimeOfDay.now();
-      _endTime = widget.existingEvent!.endTime ?? TimeOfDay.now().replacing(hour: TimeOfDay.now().hour + 1);
       _isRepeating = widget.existingEvent!.isRepeating;
       _selectedRepeatDays = List<int>.from(widget.existingEvent!.repeatDays);
       _selectedReminders = List<int>.from(widget.existingEvent!.reminders);
@@ -180,7 +178,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
       description: _descriptionController.text,
       date: _selectedDate,
       startTime: _startTime,
-      endTime: _endTime,
+      endTime: _startTime, // End time is now same as start time
       type: 'local',
       category: 'General',
       reminders: _selectedReminders,
@@ -317,7 +315,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Start Time', style: Theme.of(context).textTheme.bodyMedium),
+                        Text('Event Time', style: Theme.of(context).textTheme.bodyMedium),
                         SizedBox(height: 8),
                         GestureDetector(
                           onTap: () async {
@@ -334,40 +332,15 @@ class _AddEventScreenState extends State<AddEventScreen> {
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(color: Theme.of(context).dividerColor),
                             ),
-                            child: Text(
-                              _startTime.format(context),
-                              style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('End Time', style: Theme.of(context).textTheme.bodyMedium),
-                        SizedBox(height: 8),
-                        GestureDetector(
-                          onTap: () async {
-                            final picked = await showTimePicker(
-                              context: context,
-                              initialTime: _endTime,
-                            );
-                            if (picked != null) setState(() => _endTime = picked);
-                          },
-                          child: Container(
-                            padding: EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).cardColor,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Theme.of(context).dividerColor),
-                            ),
-                            child: Text(
-                              _endTime.format(context),
-                              style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
+                            child: Row(
+                              children: [
+                                Icon(Icons.access_time, color: Colors.grey, size: 20),
+                                SizedBox(width: 12),
+                                Text(
+                                  _startTime.format(context),
+                                  style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
+                                ),
+                              ],
                             ),
                           ),
                         ),

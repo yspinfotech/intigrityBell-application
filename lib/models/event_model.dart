@@ -37,7 +37,11 @@ class Event {
   String get dateString => DateFormat('MMM dd, yyyy').format(date);
   
   String get timeRange {
-    if (startTime == null || endTime == null) return 'All Day';
+    if (startTime == null) return 'All Day';
+    if (endTime == null || 
+        (startTime!.hour == endTime!.hour && startTime!.minute == endTime!.minute)) {
+      return _formatTimeOfDay(startTime!);
+    }
     return '${_formatTimeOfDay(startTime!)} - ${_formatTimeOfDay(endTime!)}';
   }
   

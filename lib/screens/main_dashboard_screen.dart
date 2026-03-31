@@ -86,13 +86,7 @@ class MainDashboardScreen extends StatelessWidget {
                       subtitle: isManager ? 'Assign & Track' : 'My Tasks',
                       onTap: () => Navigator.pushNamed(context, '/tasks'),
                     ),
-                    _buildDashboardCard(
-                      context,
-                      title:'Event',
-                      icon: Icons.campaign_rounded,
-                      subtitle: 'System Notices',
-                      onTap: () => Navigator.pushNamed(context, '/events'),
-                    ),
+
                     _buildDashboardCard(
                       context,
                       title: 'Note',

@@ -8,13 +8,11 @@ import '../providers/event_provider.dart';
 import '../providers/task_provider.dart';
 import '../providers/user_provider.dart';
 import '../providers/plan_day_provider.dart';
-import '../models/plan_day_model.dart';
 import '../widgets/calendar_drawer.dart';
 import '../widgets/schedule_view.dart';
 import '../widgets/time_grid_view.dart';
 import '../services/notification_service.dart';
 import 'event_details_screen.dart';
-import 'plan_day_screen.dart';
 import '../models/task_model.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -44,15 +42,14 @@ class _HomeScreenState extends State<HomeScreen> {
         context.read<TaskProvider>().fetchTasks();
         context.read<EventProvider>().fetchSystemEvents(userProvider.token!);
       }
-      
+
       // Process any alarm that fired while app was starting (Step 7)
       NotificationService().processPendingAlarm();
-      
+
       // Show battery optimization guide if needed (Post-alarm-fix polish)
       _checkAndShowBatteryGuide();
     });
   }
-
 
   @override
   void dispose() {
@@ -78,7 +75,10 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Icon(Icons.battery_saver, color: Theme.of(context).primaryColor),
             const SizedBox(width: 10),
-            Text('Alarm Reliability', style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              'Alarm Reliability',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
           ],
         ),
         content: Text(
@@ -88,7 +88,10 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Maybe Later', style: TextStyle(color: Colors.grey)),
+            child: const Text(
+              'Maybe Later',
+              style: TextStyle(color: Colors.grey),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
@@ -122,19 +125,25 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Text(
               DateFormat('MMMM yyyy').format(_focusedDay),
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 18),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontSize: 18),
             ),
-            const SizedBox(width: 8),
-            _buildViewSwitcher(),
           ],
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.account_circle_outlined, color: Theme.of(context).iconTheme.color),
+            icon: Icon(
+              Icons.account_circle_outlined,
+              color: Theme.of(context).iconTheme.color,
+            ),
             onPressed: () => Navigator.pushNamed(context, '/user-profile'),
           ),
           IconButton(
-            icon: Icon(Icons.notifications_none_outlined, color: Theme.of(context).iconTheme.color),
+            icon: Icon(
+              Icons.notifications_none_outlined,
+              color: Theme.of(context).iconTheme.color,
+            ),
             onPressed: () => Navigator.pushNamed(context, '/notifications'),
           ),
         ],
@@ -153,50 +162,19 @@ class _HomeScreenState extends State<HomeScreen> {
         type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.add_circle_outline), label: 'Add Event'),
-          BottomNavigationBarItem(icon: Icon(Icons.today), label: 'Plan Day'),
-          // BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'Stats'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add_circle_outline),
+            label: 'Add Event',
+          ),
         ],
         onTap: (index) {
           if (index == 0) {
             setState(() => _currentIndex = 0);
-          } else {
-            switch (index) {
-              case 1:
-                Navigator.pushNamed(context, '/add-event');
-                break;
-              case 2:
-                Navigator.push(context, MaterialPageRoute(builder: (context) => PlanDayScreen(initialDate: _selectedDay ?? DateTime.now())));
-                break;
-              case 3:
-                Navigator.pushNamed(context, '/stats-dashboard');
-                break;
-            }
+          } else if (index == 1) {
+            Navigator.pushNamed(context, '/add-event');
           }
         },
       ),
-    );
-  }
-
-  Widget _buildViewSwitcher() {
-    return PopupMenuButton<CalendarViewType>(
-      initialValue: _viewType,
-      offset: const Offset(0, 40),
-      icon: Icon(Icons.arrow_drop_down, color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7)),
-      onSelected: (view) {
-        setState(() {
-          _viewType = view;
-          if (view == CalendarViewType.month) _calendarFormat = CalendarFormat.month;
-          if (view == CalendarViewType.week) _calendarFormat = CalendarFormat.week;
-          if (view == CalendarViewType.day) _calendarFormat = CalendarFormat.week; 
-        });
-      },
-      itemBuilder: (context) => [
-        const PopupMenuItem(value: CalendarViewType.schedule, child: Text("Schedule")),
-        const PopupMenuItem(value: CalendarViewType.day, child: Text("Day (Grid)")),
-        const PopupMenuItem(value: CalendarViewType.week, child: Text("Week (Grid)")),
-        const PopupMenuItem(value: CalendarViewType.month, child: Text("Month")),
-      ],
     );
   }
 
@@ -205,22 +183,21 @@ class _HomeScreenState extends State<HomeScreen> {
       return const ScheduleView();
     }
 
-    if (_viewType == CalendarViewType.day || _viewType == CalendarViewType.week) {
-        return _buildGridView();
+    if (_viewType == CalendarViewType.day ||
+        _viewType == CalendarViewType.week) {
+      return _buildGridView();
     }
 
     return Column(
       children: [
         _buildCalendarHeader(),
-        Expanded(
-          child: _buildAgendaList(),
-        ),
+        Expanded(child: _buildAgendaList()),
       ],
     );
   }
 
   Widget _buildGridView() {
-     return Consumer2<EventProvider, TaskProvider>(
+    return Consumer2<EventProvider, TaskProvider>(
       builder: (context, eventProvider, taskProvider, _) {
         final selectedDate = _selectedDay ?? DateTime.now();
         final events = eventProvider.getEventsByDate(selectedDate);
@@ -231,16 +208,16 @@ class _HomeScreenState extends State<HomeScreen> {
         }
 
         return Column(
-           children: [
-             _buildCalendarHeader(),
-             Expanded(
-               child: TimeGridView(
-                 selectedDate: selectedDate,
-                 events: events,
-                 tasks: tasks,
-               ),
-             ),
-           ],
+          children: [
+            _buildCalendarHeader(),
+            Expanded(
+              child: TimeGridView(
+                selectedDate: selectedDate,
+                events: events,
+                tasks: tasks,
+              ),
+            ),
+          ],
         );
       },
     );
@@ -267,12 +244,27 @@ class _HomeScreenState extends State<HomeScreen> {
           });
         },
         calendarStyle: CalendarStyle(
-          defaultTextStyle: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
-          weekendTextStyle: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.7)),
+          defaultTextStyle: TextStyle(
+            color: Theme.of(context).textTheme.bodyLarge?.color,
+          ),
+          weekendTextStyle: TextStyle(
+            color: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.color?.withOpacity(0.7),
+          ),
           outsideTextStyle: const TextStyle(color: Colors.grey),
-          selectedDecoration: BoxDecoration(color: Theme.of(context).primaryColor, shape: BoxShape.circle),
-          todayDecoration: const BoxDecoration(color: Color(0xFF6C63FF), shape: BoxShape.circle),
-          markerDecoration: BoxDecoration(color: Theme.of(context).primaryColor, shape: BoxShape.circle),
+          selectedDecoration: BoxDecoration(
+            color: Theme.of(context).primaryColor,
+            shape: BoxShape.circle,
+          ),
+          todayDecoration: const BoxDecoration(
+            color: Color(0xFF6C63FF),
+            shape: BoxShape.circle,
+          ),
+          markerDecoration: BoxDecoration(
+            color: Theme.of(context).primaryColor,
+            shape: BoxShape.circle,
+          ),
         ),
         daysOfWeekStyle: const DaysOfWeekStyle(
           weekdayStyle: TextStyle(color: Colors.grey, fontSize: 12),
@@ -295,54 +287,44 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Text(
                   "Agenda for ${DateFormat('MMM dd').format(_selectedDay ?? DateTime.now())}",
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 18),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontSize: 18),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 12),
           Consumer3<EventProvider, TaskProvider, PlanDayProvider>(
-            builder: (context, eventProvider, taskProvider, planDayProvider, _) {
-              final selectedDate = _selectedDay ?? DateTime.now();
-              final events = eventProvider.getEventsByDate(selectedDate);
-              final plans = planDayProvider.getPlansByDate(selectedDate);
-              
-              final filters = eventProvider.filters;
-              List<dynamic> tasks = [];
-              if (filters['task'] == true) {
-                tasks = taskProvider.getTasksByDate(selectedDate);
-              }
+            builder:
+                (context, eventProvider, taskProvider, planDayProvider, _) {
+                  final selectedDate = _selectedDay ?? DateTime.now();
+                  final events = eventProvider.getEventsByDate(selectedDate);
+                  final plans = planDayProvider.getPlansByDate(selectedDate);
 
-              if (events.isEmpty && tasks.isEmpty && plans.isEmpty) {
-                return _buildEmptyAgenda();
-              }
+                  final filters = eventProvider.filters;
+                  List<dynamic> tasks = [];
+                  if (filters['task'] == true) {
+                    tasks = taskProvider.getTasksByDate(selectedDate);
+                  }
 
-              return Column(
-                children: [
-                  if (plans.isNotEmpty) ...[
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Daily Plans", style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 16)),
-                          TextButton(
-                            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => PlanDayScreen(initialDate: _selectedDay ?? DateTime.now()))),
-                            child: const Text("View All", style: TextStyle(color: Colors.blue, fontSize: 12)),
-                          ),
-                        ],
-                      ),
-                    ),
-                    ...plans.map((plan) => _buildPlanCard(plan, planDayProvider)),
-                    Divider(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.24), height: 32),
-                  ],
-                  if (events.isNotEmpty) ...events.map((event) => _buildEventCard(event)),
-                  if (tasks.isNotEmpty) ...tasks.map((task) => _buildTaskCard(task, taskProvider)),
-                ],
-              );
-            },
+                  if (events.isEmpty && tasks.isEmpty && plans.isEmpty) {
+                    return _buildEmptyAgenda();
+                  }
+
+                  return Column(
+                    children: [
+                      if (events.isNotEmpty)
+                        ...events.map((event) => _buildEventCard(event)),
+                      if (tasks.isNotEmpty)
+                        ...tasks.map(
+                          (task) => _buildTaskCard(task, taskProvider),
+                        ),
+                    ],
+                  );
+                },
           ),
-           const SizedBox(height: 80), // Space for bottom nav
+          const SizedBox(height: 80), // Space for bottom nav
         ],
       ),
     );
@@ -356,7 +338,15 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Icon(Icons.event_note, color: Colors.grey[600], size: 64),
             const SizedBox(height: 16),
-            Text('No plans for today', style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.54), fontSize: 16)),
+            Text(
+              'No plans for today',
+              style: TextStyle(
+                color: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.color?.withOpacity(0.54),
+                fontSize: 16,
+              ),
+            ),
           ],
         ),
       ),
@@ -374,7 +364,12 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: InkWell(
         onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => EventDetailsScreen(event: event)));
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => EventDetailsScreen(event: event),
+            ),
+          );
         },
         child: Row(
           children: [
@@ -384,20 +379,41 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   Text(
                     event.title,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 14),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleLarge?.copyWith(fontSize: 14),
                   ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      Icon(Icons.access_time, color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.54), size: 12),
+                      Icon(
+                        Icons.access_time,
+                        color: Theme.of(
+                          context,
+                        ).textTheme.bodyMedium?.color?.withOpacity(0.54),
+                        size: 12,
+                      ),
                       const SizedBox(width: 4),
-                      Text(event.timeRange, style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.54), fontSize: 12)),
+                      Text(
+                        event.timeRange,
+                        style: TextStyle(
+                          color: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.color?.withOpacity(0.54),
+                          fontSize: 12,
+                        ),
+                      ),
                     ],
                   ),
                 ],
               ),
             ),
-            Icon(Icons.chevron_right, color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.38)),
+            Icon(
+              Icons.chevron_right,
+              color: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.color?.withOpacity(0.38),
+            ),
           ],
         ),
       ),
@@ -417,8 +433,14 @@ class _HomeScreenState extends State<HomeScreen> {
           Checkbox(
             value: task.isCompleted,
             onChanged: (value) {
-              final userProvider = Provider.of<UserProvider>(context, listen: false);
-              taskProvider.toggleTaskCompletion(task.id, userProvider.token ?? '');
+              final userProvider = Provider.of<UserProvider>(
+                context,
+                listen: false,
+              );
+              taskProvider.toggleTaskCompletion(
+                task.id,
+                userProvider.token ?? '',
+              );
             },
             activeColor: Theme.of(context).primaryColor,
           ),
@@ -430,11 +452,21 @@ class _HomeScreenState extends State<HomeScreen> {
                   task.title,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontSize: 14,
-                    decoration: task.isCompleted ? TextDecoration.lineThrough : null,
+                    decoration: task.isCompleted
+                        ? TextDecoration.lineThrough
+                        : null,
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(task.timeString, style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.54), fontSize: 12)),
+                Text(
+                  task.timeString,
+                  style: TextStyle(
+                    color: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.color?.withOpacity(0.54),
+                    fontSize: 12,
+                  ),
+                ),
               ],
             ),
           ),
@@ -444,63 +476,43 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildPlanCard(PlanDayModel plan, PlanDayProvider provider) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          // Checkbox(
-          //   value: plan.isCompleted,
-          //   onChanged: (_) => provider.togglePlanStatus(plan.id),
-          //   activeColor: Theme.of(context).primaryColor,
-          // ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  plan.title,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontSize: 14,
-                    decoration: plan.isCompleted ? TextDecoration.lineThrough : null,
-                  ),
-                ),
-                if (plan.description.isNotEmpty)
-                  Text(plan.description, style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.54), fontSize: 12)),
-              ],
-            ),
-          ),
-          if (plan.voiceNotePath != null)
-            const Icon(Icons.mic, color: Colors.blue, size: 16),
-        ],
-      ),
-    );
-  }
-
   Widget _buildPriorityBadge(String priority) {
     Color color;
     switch (priority.toLowerCase()) {
-      case 'high': color = Colors.redAccent; break;
-      case 'medium': color = Colors.orangeAccent; break;
-      default: color = Theme.of(context).primaryColor;
+      case 'high':
+        color = Colors.redAccent;
+        break;
+      case 'medium':
+        color = Colors.orangeAccent;
+        break;
+      default:
+        color = Theme.of(context).primaryColor;
     }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
-      child: Text(priority, style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold)),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        priority,
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
     );
   }
 
   Color _getEventColor(dynamic event) {
     switch (event.type.toLowerCase()) {
-      case 'holiday': return Colors.blueAccent;
-      case 'notice': return Colors.orangeAccent;
-      default: return Colors.purpleAccent;
+      case 'holiday':
+        return Colors.blueAccent;
+      case 'notice':
+        return Colors.orangeAccent;
+      default:
+        return Colors.purpleAccent;
     }
   }
 }

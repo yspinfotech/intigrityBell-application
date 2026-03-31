@@ -55,7 +55,7 @@ class VoiceNoteModel {
       uploadedBy: userModel,
       role: json['role'] ?? 'member',
       createdAt: json['createdAt'] != null 
-          ? DateTime.parse(json['createdAt']) 
+          ? DateTime.parse(json['createdAt']).toLocal() 
           : DateTime.now(),
     );
   }

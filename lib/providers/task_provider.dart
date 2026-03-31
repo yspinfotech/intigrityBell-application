@@ -73,8 +73,9 @@ class TaskProvider with ChangeNotifier {
       };
       final response = await ApiService.post('/tasks', body);
       if (response.statusCode == 201) {
-        final newTask = json.decode(response.body);
-        final taskId = newTask['_id'] ?? newTask['id'];
+        final body = json.decode(response.body);
+        final taskData = body['data'] ?? body;
+        final taskId = taskData['_id'] ?? taskData['id'];
         if (audioPaths.isNotEmpty) {
            await addVoiceNotes(taskId, audioPaths);
         } else {

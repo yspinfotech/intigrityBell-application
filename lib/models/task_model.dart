@@ -77,7 +77,7 @@ class TaskModel {
       status: json['status'] ?? 'pending',
       voiceNotes: voiceNotes,
       createdAt: json['createdAt'] != null 
-          ? DateTime.parse(json['createdAt']) 
+          ? DateTime.parse(json['createdAt']).toLocal() 
           : DateTime.now(),
     );
   }

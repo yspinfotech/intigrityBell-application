@@ -37,16 +37,7 @@ class CalendarDrawer extends StatelessWidget {
               ),
             ),
 
-            ListTile(
-              leading: const Icon(Icons.campaign_outlined, color: Colors.orangeAccent),
-              title: const Text('System Noticeboard', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-              subtitle: const Text('View all company notices', style: TextStyle(color: Colors.white54, fontSize: 10)),
-              trailing: const Icon(Icons.chevron_right, color: Colors.white38),
-              onTap: () {
-                Navigator.pop(context); // Close drawer
-                Navigator.pushNamed(context, '/events');
-              },
-            ),
+
             const Spacer(),
             const Divider(color: Colors.white12),
             ListTile(
