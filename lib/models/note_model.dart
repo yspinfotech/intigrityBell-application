@@ -7,6 +7,7 @@ class Note {
   final DateTime date;
   final String category;
   final String? voiceNotePath;
+  final String? scannedImagePath;
   final bool isAIGenerated;
 
   Note({
@@ -16,6 +17,7 @@ class Note {
     required this.date,
     this.category = 'General',
     this.voiceNotePath,
+    this.scannedImagePath,
     this.isAIGenerated = false,
   });
 
@@ -29,6 +31,7 @@ class Note {
       date: DateTime.parse(json['date'] ?? DateTime.now().toIso8601String()),
       category: json['category'] ?? 'General',
       voiceNotePath: json['voiceNotePath'],
+      scannedImagePath: json['scannedImagePath'],
       isAIGenerated: json['isAIGenerated'] ?? false,
     );
   }
@@ -41,6 +44,7 @@ class Note {
       'date': date.toIso8601String(),
       'category': category,
       'voiceNotePath': voiceNotePath,
+      'scannedImagePath': scannedImagePath,
       'isAIGenerated': isAIGenerated,
     };
   }

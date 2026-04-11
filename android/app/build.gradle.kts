@@ -47,4 +47,6 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+    // ML Kit Devanagari (Hindi/Marathi) text recognition
+    implementation("com.google.mlkit:text-recognition-devanagari:16.0.1")
 }

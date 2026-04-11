@@ -36,7 +36,8 @@ dependencies:
   android_intent_plus: ^5.1.4
   # AI Notes - Document Scan & OCR
   image_picker: ^1.1.2
-  google_mlkit_text_recognition: ^0.13.1
+  google_mlkit_text_recognition: ^0.15.1
+  google_mlkit_language_id: ^0.11.0
   image: ^4.8.0
   flutter_timezone: ^5.0.2
   alarm: ^3.1.4

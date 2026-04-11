@@ -9,6 +9,10 @@ import 'package:path_provider/path_provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image/image.dart' as img;
+import 'package:permission_handler/permission_handler.dart';
+import '../services/smart_ai_service.dart';
+import '../utils/language_utils.dart';
+
 import '../providers/note_provider.dart';
 import '../providers/task_provider.dart';
 import '../providers/user_provider.dart';
@@ -23,11 +27,18 @@ class AddNoteScreen extends StatefulWidget {
   State<AddNoteScreen> createState() => _AddNoteScreenState();
 }
 
-class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateMixin {
+class _AddNoteScreenState extends State<AddNoteScreen>
+    with TickerProviderStateMixin {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
   String _selectedCategory = 'General';
-  final List<String> _categories = ['General', 'Work', 'Personal', 'Idea', 'Meeting'];
+  final List<String> _categories = [
+    'General',
+    'Work',
+    'Personal',
+    'Idea',
+    'Meeting',
+  ];
 
   // Audio recording
   bool _isRecording = false;
@@ -42,6 +53,8 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
 
   // Scan state
   bool _isScanning = false;
+  String? _scannedImagePath;
+  String? _detectedLanguageCode;
 
   // Animation
   late AnimationController _aiAnimController;
@@ -55,6 +68,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
       _contentController.text = widget.existingNote!.content;
       _selectedCategory = widget.existingNote!.category;
       _recordedFilePath = widget.existingNote!.voiceNotePath;
+      _scannedImagePath = widget.existingNote!.scannedImagePath;
     }
 
     _aiAnimController = AnimationController(
@@ -67,7 +81,8 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
     );
 
     _previewPlayer.onPlayerStateChanged.listen((state) {
-      if (mounted) setState(() => _isPlayingPreview = state == PlayerState.playing);
+      if (mounted)
+        setState(() => _isPlayingPreview = state == PlayerState.playing);
     });
   }
 
@@ -87,7 +102,8 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
     try {
       if (await _audioRecorder.hasPermission()) {
         final dir = await getApplicationDocumentsDirectory();
-        final path = '${dir.path}/note_voice_${DateTime.now().millisecondsSinceEpoch}.m4a';
+        final path =
+            '${dir.path}/note_voice_${DateTime.now().millisecondsSinceEpoch}.m4a';
         await _audioRecorder.start(const RecordConfig(), path: path);
         setState(() => _isRecording = true);
       } else {
@@ -123,12 +139,22 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
   // ─── Document Scan / OCR ─────────────────────────────────────────────────
 
   Future<void> _scanDocument(ImageSource source) async {
+    // 1. Check Permissions
+    final hasPermission = await _checkPermissions();
+    if (!hasPermission) {
+      _showSnack(
+        'Permission required to scan and save documents',
+        isError: true,
+      );
+      return;
+    }
+
     setState(() => _isScanning = true);
     try {
       final picker = ImagePicker();
       final pickedFile = await picker.pickImage(
         source: source,
-        imageQuality: 100, // Keep high quality for better OCR
+        imageQuality: 100,
         preferredCameraDevice: CameraDevice.rear,
       );
 
@@ -137,54 +163,79 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
         return;
       }
 
-      // 1. Image Preprocessing for better OCR accuracy
+      // 2. Image Preprocessing (Improved)
       final processedFile = await _preprocessImage(pickedFile.path);
       final finalImagePath = processedFile?.path ?? pickedFile.path;
 
       final inputImage = InputImage.fromFilePath(finalImagePath);
-      
-      // 2. Multi-language OCR Support (Latin + Devanagari for English, Hindi, Marathi)
-      final latinRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
+
+      // 3. OCR — Dual script strategy (Devanagari + Latin)
       final devanagariRecognizer = TextRecognizer(script: TextRecognitionScript.devanagiri);
-      
-      // Process both scripts to handle mixed language documents
-      final results = await Future.wait([
-        latinRecognizer.processImage(inputImage),
-        devanagariRecognizer.processImage(inputImage),
-      ]);
-      
-      await latinRecognizer.close();
+      final devanagariResult = await devanagariRecognizer.processImage(inputImage);
       await devanagariRecognizer.close();
 
-      final latinText = results[0].text;
-      final devanagariText = results[1].text;
-      
-      // 3. Smart Merge / Selection (Optionally combine or pick the most confident/lengthy)
-      // If Devanagari model picked up significant text, it likely contains Hindi/Marathi
-      String scannedText;
-      if (devanagariText.trim().length > latinText.trim().length * 0.3) {
-        // Often Devanagari recognizer includes Latin characters too
-        scannedText = devanagariText;
+      final latinRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
+      final latinResult = await latinRecognizer.processImage(inputImage);
+      await latinRecognizer.close();
+
+      final bool richDevanagari = devanagariResult.text.trim().length > 5;
+      final bool richLatin = latinResult.text.trim().length > 5;
+
+      // Merge all snippets for detection
+      String mergedScanText;
+      if (richDevanagari && richLatin) {
+        mergedScanText = '${devanagariResult.text} ${latinResult.text}';
+      } else if (richDevanagari) {
+        mergedScanText = devanagariResult.text;
       } else {
-        scannedText = latinText;
+        mergedScanText = latinResult.text;
       }
 
-      // 4. Post-processing: Clean extracted text
-      scannedText = _cleanExtractedText(scannedText);
+      // --- Handwriting Fallback Detection ---
+      // Trigger AI OCR if text is short, highly fragmented, or empty
+      final bool isHandwrittenHeuristic = 
+          mergedScanText.trim().isEmpty || 
+          mergedScanText.trim().length < 20 || 
+          mergedScanText.split('\n').length > mergedScanText.length / 5;
 
-      if (scannedText.isNotEmpty) {
+      if (isHandwrittenHeuristic) {
+        _showSnack('Handwriting or low quality detected. Enhancing with AI...', isError: false);
+        try {
+          final aiResult = await SmartAiService.performAiOcr(finalImagePath);
+          if (aiResult.isNotEmpty && aiResult.length > mergedScanText.length) {
+            mergedScanText = aiResult;
+          }
+        } catch (e) {
+          debugPrint('Handwriting OCR Fallback failed: $e');
+        }
+      }
+
+      if (mergedScanText.trim().isNotEmpty) {
+        final String langCode = await SmartAiService.detectLanguageSmart(mergedScanText);
+        final String langLabel = LanguageUtils.getLanguageLabel(langCode);
+
+        final cleanedText = _cleanTextImproved(mergedScanText);
         final current = _contentController.text;
+
         setState(() {
+          _detectedLanguageCode = langCode;
           _contentController.text = current.isEmpty
-              ? scannedText
-              : '$current\n\n--- Scanned Text ---\n$scannedText';
+              ? cleanedText
+              : '$current\n\n--- Scanned ($langLabel) ---\n$cleanedText';
         });
-        _showSnack('✅ Document scanned successfully!');
+
+        // 6. Secure Local Storage (Image + Text)
+        final savedPath = await _saveScanToLocalStorage(
+          pickedFile.path,
+          cleanedText,
+        );
+        setState(() => _scannedImagePath = savedPath);
+
+        _showSnack('✅ Scanned ($langLabel) & saved!');
       } else {
-        _showSnack('No text found in image', isError: true);
+        _showSnack('No text found. Try better lighting or hold steady.', isError: true);
       }
-      
-      // Clean up preprocessed file
+
       if (processedFile != null && await processedFile.exists()) {
         await processedFile.delete();
       }
@@ -195,35 +246,104 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
     }
   }
 
-  /// Implements image preprocessing: Grayscale, Contrast, Resize, and Noise reduction
+  Future<bool> _checkPermissions() async {
+    // Basic permissions for Android and iOS
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.camera,
+      if (Platform.isAndroid) ...[
+        if (await _isAndroid13OrHigher()) 
+          Permission.photos 
+        else 
+          Permission.storage,
+      ],
+    ].request();
+
+    // Check MANAGE_EXTERNAL_STORAGE for custom directory access on Android 11+
+    if (Platform.isAndroid && await _isAndroid11OrHigher()) {
+      if (!await Permission.manageExternalStorage.isGranted) {
+        await Permission.manageExternalStorage.request();
+      }
+    }
+
+    bool allGranted = statuses.values.every((status) => status.isGranted);
+
+    if (!allGranted) {
+      if (statuses.values.any((status) => status.isPermanentlyDenied)) {
+        openAppSettings();
+      } else {
+        _showSnack('Permission required to scan and save documents', isError: true);
+      }
+    }
+    return allGranted;
+  }
+
+  Future<bool> _isAndroid13OrHigher() async {
+    if (!Platform.isAndroid) return false;
+    return true;
+  }
+
+  Future<bool> _isAndroid11OrHigher() async {
+    if (!Platform.isAndroid) return false;
+    return true;
+  }
+
+  /// Implements image preprocessing: Grayscale, Contrast, and Noise reduction
   Future<File?> _preprocessImage(String filePath) async {
     try {
       final bytes = await File(filePath).readAsBytes();
       img.Image? image = img.decodeImage(bytes);
-      
+
       if (image == null) return null;
 
       // 1. Convert to Grayscale
       image = img.grayscale(image);
-      
-      // 2. Increase Contrast (helps OCR distinguish text from background)
-      image = img.adjustColor(image, contrast: 1.5);
-      
-      // 3. Resize if too large (balancing performance and accuracy)
+
+      // 2. Sharpening Filter (Convolution) to enhance pen strokes
+      final sharpenKernel = [
+        0, -1, 0,
+        -1, 5, -1,
+        0, -1, 0
+      ];
+      image = img.convolution(image, filter: sharpenKernel);
+
+      // 3. Noise Reduction (Gaussian Blur)
+      image = img.gaussianBlur(image, radius: 1);
+
+      // 4. Contrast & Brightness Adjustment
+      image = img.adjustColor(image, contrast: 1.8, brightness: 1.1);
+
+      // 5. Binary Thresholding (B&W conversion for sharp OCR)
+      const int threshold = 140; // Adjustable based on image brightness
+      for (int y = 0; y < image.height; y++) {
+        for (int x = 0; x < image.width; x++) {
+          final pixel = image.getPixel(x, y);
+          // luminence = r*0.3 + g*0.59 + b*0.11
+          final luminance = (pixel.r * 0.3 + pixel.g * 0.59 + pixel.b * 0.11).toInt();
+          if (luminance < threshold) {
+            image.setPixelRgba(x, y, 0, 0, 0, 255); // Black
+          } else {
+            image.setPixelRgba(x, y, 255, 255, 255, 255); // White
+          }
+        }
+      }
+
+      // 6. Resize if too large
       if (image.width > 2000 || image.height > 2000) {
         image = img.copyResize(
-          image, 
+          image,
           width: image.width > image.height ? 2000 : null,
           height: image.height > image.width ? 2000 : null,
-          interpolation: img.Interpolation.linear
+          interpolation: img.Interpolation.linear,
         );
       }
 
       final tempDir = await getTemporaryDirectory();
-      final tempPath = '${tempDir.path}/ocr_prep_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final tempPath =
+          '${tempDir.path}/ocr_prep_${DateTime.now().millisecondsSinceEpoch}.jpg';
       final processedFile = File(tempPath);
+      // Save it asynchronously by wrapping in wait
       await processedFile.writeAsBytes(img.encodeJpg(image, quality: 90));
-      
+
       return processedFile;
     } catch (e) {
       debugPrint('Preprocessing error: $e');
@@ -231,28 +351,48 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
     }
   }
 
-  /// Cleans extracted text by normalizing spacing and removing OCR artifacts
-  String _cleanExtractedText(String text) {
+  String _cleanTextImproved(String text) {
     if (text.isEmpty) return "";
-    
-    // Normalize line endings and spacing
-    String cleaned = text.replaceAll('\r', '\n');
-    
-    // Remove typical OCR "noise" symbols but keep alphanumeric, punctuation, and Devanagari
-    cleaned = cleaned.split('').where((char) {
-      final code = char.codeUnitAt(0);
-      return (code >= 0x41 && code <= 0x5A) || // A-Z
-             (code >= 0x61 && code <= 0x7A) || // a-z
-             (code >= 0x30 && code <= 0x39) || // 0-9
-             (code >= 0x0900 && code <= 0x097F) || // Devanagari range
-             ".,!?:;()-'/\"\n ".contains(char); // Common punctuation and space
-    }).join('');
+    // Normalize and keep letters, Devanagari, numbers, and common punctuation/spaces
+    return text
+        .replaceAll(RegExp(r'[^a-zA-Z0-9\u0900-\u097F\s.,!?:;#@\(\)\[\]-]'), '')
+        .trim();
+  }
 
-    // Normalize multiple spaces and extra newlines
-    cleaned = cleaned.replaceAll(RegExp(r' {2,}'), ' ');
-    cleaned = cleaned.replaceAll(RegExp(r'\n{3,}'), '\n\n');
-    
-    return cleaned.trim();
+  Future<String?> _saveScanToLocalStorage(
+    String originalImagePath,
+    String text,
+  ) async {
+    try {
+      Directory? directory;
+      if (Platform.isAndroid) {
+        // android: /storage/emulated/0/Integrity-Bell/
+        directory = Directory('/storage/emulated/0/Integrity-Bell');
+      } else {
+        // ios: Application Documents Directory
+        directory = await getApplicationDocumentsDirectory();
+      }
+
+      if (!await directory.exists()) await directory.create(recursive: true);
+
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+
+      // Save scanned images as files (.jpg)
+      final imageFile = File(originalImagePath);
+      final String extension = imageFile.path.split('.').last.toLowerCase();
+      final String fileName = 'scan_$timestamp.${extension.isEmpty ? 'jpg' : extension}';
+      
+      final savedImageFile = await imageFile.copy('${directory.path}/$fileName');
+
+      // OCR text is saved inside the Note model and JSON system (Provider handles this).
+      // We don't necessarily need a text file here, but can keep as local backup if desired.
+      // But the requirement says "Save OCR text inside note JSON".
+      
+      return savedImageFile.path;
+    } catch (e) {
+      debugPrint('Local storage error: $e');
+      return null;
+    }
   }
 
   void _showScanOptions() {
@@ -276,19 +416,38 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
               ),
             ),
             const SizedBox(height: 16),
-            const Text('Scan Document', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+            const Text(
+              'Scan Document',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: 16),
             ListTile(
-              leading: Icon(Icons.camera_alt_rounded, color: Theme.of(context).primaryColor),
-              title: Text('Take a Photo', style: Theme.of(context).textTheme.bodyLarge),
+              leading: Icon(
+                Icons.camera_alt_rounded,
+                color: Theme.of(context).primaryColor,
+              ),
+              title: Text(
+                'Take a Photo',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
               onTap: () {
                 Navigator.pop(context);
                 _scanDocument(ImageSource.camera);
               },
             ),
             ListTile(
-              leading: Icon(Icons.photo_library_rounded, color: Theme.of(context).primaryColor),
-              title: Text('Choose from Gallery', style: Theme.of(context).textTheme.bodyLarge),
+              leading: Icon(
+                Icons.photo_library_rounded,
+                color: Theme.of(context).primaryColor,
+              ),
+              title: Text(
+                'Choose from Gallery',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
               onTap: () {
                 Navigator.pop(context);
                 _scanDocument(ImageSource.gallery);
@@ -316,94 +475,127 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
       _aiMode = mode;
     });
 
-    // Simulate processing delay
-    await Future.delayed(const Duration(milliseconds: 1200));
-
-    if (!mounted) return;
-
     try {
+      String result = "";
       switch (mode) {
         case 'summarize':
-          await _aiSummarize(content);
+          result = await SmartAiService.summarize(content);
+          _showAIResultDialog(
+            title: '✨ AI Summary',
+            content: result,
+            onApply: () {
+              final updated = '${_contentController.text}\n\n─── AI Summary ───\n$result';
+              setState(() => _contentController.text = updated);
+            },
+          );
           break;
-        case 'improve':
-          await _aiImprove(content);
+        case 'rewrite':
+          result = await SmartAiService.rewrite(content);
+          _showAIResultDialog(
+            title: '✍️ AI Rewrite',
+            content: result,
+            onApply: () => setState(() => _contentController.text = result),
+          );
+          break;
+        case 'points':
+          result = await SmartAiService.convertToBulletPoints(content);
+          _showAIResultDialog(
+            title: '📝 AI Key Points',
+            content: result,
+            onApply: () {
+              final updated = '${_contentController.text}\n\n─── Key Points ───\n$result';
+              setState(() => _contentController.text = updated);
+            },
+          );
+          break;
+        case 'list':
+          result = await SmartAiService.convertToNumberedList(content);
+          _showAIResultDialog(
+            title: '🔢 Numbered List',
+            content: result,
+            onApply: () {
+              final updated = '${_contentController.text}\n\n─── Numbered List ───\n$result';
+              setState(() => _contentController.text = updated);
+            },
+          );
+          break;
+        case 'table':
+          result = await SmartAiService.convertToTable(content);
+          _showAIResultDialog(
+            title: '📊 Data Table',
+            content: result,
+            onApply: () {
+              final updated = '${_contentController.text}\n\n$result';
+              setState(() => _contentController.text = updated);
+            },
+          );
+          break;
+        case 'translate':
+          await _showTranslationDialog(content);
           break;
         case 'tasks':
           await _aiConvertToTasks(content);
           break;
       }
+    } catch (e) {
+      _showSnack('AI processing failed. Check API key or connection.', isError: true);
     } finally {
-      if (mounted) setState(() {
-        _isAIProcessing = false;
-        _aiMode = null;
-      });
+      if (mounted) {
+        setState(() {
+          _isAIProcessing = false;
+          _aiMode = null;
+        });
+      }
     }
   }
 
-  Future<void> _aiSummarize(String content) async {
-    // Smart local summarization — take first sentence of each paragraph
-    final paragraphs = content
-        .split('\n')
-        .where((p) => p.trim().isNotEmpty)
-        .toList();
-
-    String summary;
-    if (paragraphs.length <= 2) {
-      // Short content: take first 100 chars
-      summary = content.length > 150 ? '${content.substring(0, 150)}...' : content;
-    } else {
-      // Multi-paragraph: first sentence of each paragraph
-      final sentences = paragraphs.map((p) {
-        final firstDot = p.indexOf('.');
-        return firstDot > 0 ? p.substring(0, firstDot + 1) : p;
-      }).take(3).join(' ');
-      summary = '📝 Summary:\n$sentences';
-    }
-
-    _showAIResultDialog(
-      title: '✨ AI Summary',
-      content: summary,
-      onApply: () {
-        // Append summary to note
-        final updated = '${_contentController.text}\n\n─── AI Summary ───\n$summary';
-        setState(() => _contentController.text = updated);
-      },
-    );
-  }
-
-  Future<void> _aiImprove(String content) async {
-    // Smart local improvement — fix common patterns
-    String improved = content;
-    
-    // Capitalize sentences
-    improved = improved.replaceAllMapped(
-      RegExp(r'(?:^|[.!?]\s+)([a-z])'),
-      (m) => m[0]!.replaceFirst(m[1]!, m[1]!.toUpperCase()),
-    );
-    
-    // Fix double spaces
-    improved = improved.replaceAll(RegExp(r' {2,}'), ' ');
-    
-    // Fix common typos
-    final typoFixes = {
-      ' i ': ' I ',
-      'dont': "don't",
-      'cant': "can't",
-      'wont': "won't",
-      'isnt': "isn't",
-      'wasnt': "wasn't",
-      'werent': "weren't",
+  Future<void> _showTranslationDialog(String content) async {
+    final targetLanguages = {
+      'en': 'English',
+      'hi': 'Hindi',
+      'mr': 'Marathi',
+      'es': 'Spanish',
+      'fr': 'French',
+      'de': 'German',
     };
-    for (final entry in typoFixes.entries) {
-      improved = improved.replaceAll(entry.key, entry.value);
-    }
 
-    _showAIResultDialog(
-      title: '✍️ Improved Writing',
-      content: improved,
-      onApply: () => setState(() => _contentController.text = improved),
+    String? selectedLang = 'en';
+
+    await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('🌐 Translate to...'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: targetLanguages.entries.map((entry) {
+            return ListTile(
+              title: Text(entry.value),
+              onTap: () {
+                selectedLang = entry.key;
+                Navigator.pop(ctx);
+              },
+            );
+          }).toList(),
+        ),
+      ),
     );
+
+    if (selectedLang != null) {
+      setState(() => _isAIProcessing = true);
+      try {
+        final result = await SmartAiService.translate(content, targetLanguages[selectedLang!]!);
+        _showAIResultDialog(
+          title: '🌐 AI Translation (${targetLanguages[selectedLang]})',
+          content: result,
+          onApply: () {
+            final updated = '${_contentController.text}\n\n─── Translated ───\n$result';
+            setState(() => _contentController.text = updated);
+          },
+        );
+      } catch (e) {
+        _showSnack('Translation failed', isError: true);
+      }
+    }
   }
 
   Future<void> _aiConvertToTasks(String content) async {
@@ -416,11 +608,12 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
       if (trimmed.isEmpty) continue;
 
       // Detect action items: bullet points, numbers, action verbs
-      final isBullet = trimmed.startsWith('-') || 
-                       trimmed.startsWith('•') || 
-                       trimmed.startsWith('*') ||
-                       RegExp(r'^\d+[\.\)]\s').hasMatch(trimmed);
-      
+      final isBullet =
+          trimmed.startsWith('-') ||
+          trimmed.startsWith('•') ||
+          trimmed.startsWith('*') ||
+          RegExp(r'^\d+[\.\)]\s').hasMatch(trimmed);
+
       final hasActionVerb = RegExp(
         r'^(complete|finish|review|update|fix|add|create|send|write|read|call|meet|check|prepare|schedule|draft)',
         caseSensitive: false,
@@ -432,7 +625,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
             .replaceAll(RegExp(r'^[-•*]\s*'), '')
             .replaceAll(RegExp(r'^\d+[\.\)]\s*'), '')
             .trim();
-        
+
         if (taskTitle.isNotEmpty) {
           taskLines.add(taskTitle);
         }
@@ -442,9 +635,10 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
     if (taskLines.isEmpty) {
       // Fallback: use lines as tasks
       taskLines.addAll(
-        lines.where((l) => l.trim().isNotEmpty && l.trim().length < 100)
-             .take(5)
-             .map((l) => l.trim()),
+        lines
+            .where((l) => l.trim().isNotEmpty && l.trim().length < 100)
+            .take(5)
+            .map((l) => l.trim()),
       );
     }
 
@@ -464,9 +658,15 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
           backgroundColor: Theme.of(context).cardColor,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: Text('🤖 Convert to Tasks',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Text(
+            '🤖 Convert to Tasks',
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontSize: 16),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -481,10 +681,13 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
                   activeColor: Theme.of(context).primaryColor,
                   checkColor: Colors.white,
                   value: selected[entry.key],
-                  onChanged: (v) => setDialogState(() => selected[entry.key] = v!),
+                  onChanged: (v) =>
+                      setDialogState(() => selected[entry.key] = v!),
                   title: Text(
                     entry.value,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 13),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(fontSize: 13),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -501,12 +704,16 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).primaryColor,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
               onPressed: () {
                 Navigator.pop(ctx);
                 _createTasksFromNote(
-                  taskTitles.asMap().entries
+                  taskTitles
+                      .asMap()
+                      .entries
                       .where((e) => selected[e.key])
                       .map((e) => e.value)
                       .toList(),
@@ -549,7 +756,9 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
       created++;
     }
 
-    _showSnack('✅ Created $created task${created > 1 ? 's' : ''} successfully!');
+    _showSnack(
+      '✅ Created $created task${created > 1 ? 's' : ''} successfully!',
+    );
   }
 
   void _showAIResultDialog({
@@ -562,7 +771,10 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
       builder: (ctx) => AlertDialog(
         backgroundColor: Theme.of(context).cardColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(title, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 16)),
+        title: Text(
+          title,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 16),
+        ),
         content: SingleChildScrollView(
           child: Container(
             padding: const EdgeInsets.all(12),
@@ -570,11 +782,16 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
               color: Theme.of(context).scaffoldBackgroundColor,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Text(content, style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
-                  fontSize: 13,
-                  height: 1.5,
-                )),
+            child: Text(
+              content,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                fontSize: 13,
+                height: 1.5,
+              ),
+            ),
           ),
         ),
         actions: [
@@ -584,7 +801,10 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
               Navigator.pop(ctx);
               _showSnack('Copied to clipboard!');
             },
-            child: Text('Copy', style: TextStyle(color: Theme.of(context).primaryColor)),
+            child: Text(
+              'Copy',
+              style: TextStyle(color: Theme.of(context).primaryColor),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -594,7 +814,9 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).primaryColor,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
             onPressed: () {
               Navigator.pop(ctx);
@@ -617,12 +839,15 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
     }
 
     final newNote = Note(
-      id: widget.existingNote?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      id:
+          widget.existingNote?.id ??
+          DateTime.now().millisecondsSinceEpoch.toString(),
       title: _titleController.text.trim(),
       content: _contentController.text.trim(),
       date: widget.existingNote?.date ?? DateTime.now(),
       category: _selectedCategory,
       voiceNotePath: _recordedFilePath,
+      scannedImagePath: _scannedImagePath,
     );
 
     if (widget.existingNote != null) {
@@ -635,11 +860,39 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
     _showSnack('Note saved ✅', isError: false);
   }
 
+  Widget _buildAIActionButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: ActionChip(
+        avatar: Icon(icon, size: 16, color: Theme.of(context).primaryColor),
+        label: Text(label),
+        onPressed: onPressed,
+        backgroundColor: Theme.of(context).primaryColor.withOpacity(0.05),
+        labelStyle: TextStyle(
+          color: Theme.of(context).primaryColor,
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+          side: BorderSide(color: Theme.of(context).primaryColor.withOpacity(0.2)),
+        ),
+      ),
+    );
+  }
+
   void _showSnack(String message, {bool isError = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? Colors.redAccent : Theme.of(context).primaryColor,
+        backgroundColor: isError
+            ? Colors.redAccent
+            : Theme.of(context).primaryColor,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         duration: const Duration(seconds: 2),
@@ -654,7 +907,8 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final bgColor = Theme.of(context).scaffoldBackgroundColor;
     final cardColor = Theme.of(context).cardColor;
-    final textColor = Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
+    final textColor =
+        Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -685,13 +939,20 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
             )
           else
             IconButton(
-              icon: Icon(Icons.document_scanner_rounded, color: textColor.withOpacity(0.7)),
+              icon: Icon(
+                Icons.document_scanner_rounded,
+                color: textColor.withOpacity(0.7),
+              ),
               tooltip: 'Scan Document',
               onPressed: _showScanOptions,
             ),
           // Save button
           IconButton(
-            icon: Icon(Icons.check_rounded, color: Theme.of(context).primaryColor, size: 28),
+            icon: Icon(
+              Icons.check_rounded,
+              color: Theme.of(context).primaryColor,
+              size: 28,
+            ),
             onPressed: _saveNote,
           ),
         ],
@@ -707,7 +968,10 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
                 opacity: _aiPulse.value,
                 child: Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 16,
+                  ),
                   color: Theme.of(context).primaryColor.withOpacity(0.15),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -724,9 +988,17 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
                       Text(
                         _aiMode == 'summarize'
                             ? '✨ Summarizing note...'
-                            : _aiMode == 'improve'
-                                ? '✍️ Improving writing...'
-                                : '🤖 Extracting tasks...',
+                            : _aiMode == 'rewrite'
+                            ? '✍️ Rewriting note...'
+                            : _aiMode == 'translate'
+                            ? '🌐 Translating...'
+                            : _aiMode == 'points'
+                            ? '📝 Extracting points...'
+                            : _aiMode == 'list'
+                            ? '🔢 Formatting list...'
+                            : _aiMode == 'table'
+                            ? '📊 Creating table...'
+                            : '🤖 Extracting tasks...',
                         style: TextStyle(
                           color: Theme.of(context).primaryColor,
                           fontSize: 13,
@@ -752,42 +1024,65 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
                     decoration: InputDecoration(
                       hintText: 'Title',
                       hintStyle: TextStyle(
-                          color: textColor.withOpacity(0.3),
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold),
+                        color: textColor.withOpacity(0.3),
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                       border: InputBorder.none,
                     ),
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 24),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleLarge?.copyWith(fontSize: 24),
                   ),
 
                   // Meta row
                   Row(
                     children: [
                       Text(
-                        DateFormat('MMM dd, yyyy · HH:mm').format(DateTime.now()),
-                        style: TextStyle(color: textColor.withOpacity(0.4), fontSize: 12),
+                        DateFormat(
+                          'MMM dd, yyyy · HH:mm',
+                        ).format(DateTime.now()),
+                        style: TextStyle(
+                          color: textColor.withOpacity(0.4),
+                          fontSize: 12,
+                        ),
                       ),
                       const SizedBox(width: 12),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor.withOpacity(0.1),
+                          color: Theme.of(
+                            context,
+                          ).primaryColor.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: DropdownButton<String>(
                           value: _selectedCategory,
                           underline: const SizedBox(),
-                          icon: Icon(Icons.arrow_drop_down,
-                              color: Theme.of(context).primaryColor, size: 16),
+                          icon: Icon(
+                            Icons.arrow_drop_down,
+                            color: Theme.of(context).primaryColor,
+                            size: 16,
+                          ),
                           dropdownColor: Theme.of(context).cardColor,
-                          onChanged: (val) => setState(() => _selectedCategory = val!),
+                          onChanged: (val) =>
+                              setState(() => _selectedCategory = val!),
                           items: _categories
-                              .map((c) => DropdownMenuItem(
-                                    value: c,
-                                    child: Text(c,
-                                        style: TextStyle(
-                                            fontSize: 12, color: Theme.of(context).primaryColor)),
-                                  ))
+                              .map(
+                                (c) => DropdownMenuItem(
+                                  value: c,
+                                  child: Text(
+                                    c,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Theme.of(context).primaryColor,
+                                    ),
+                                  ),
+                                ),
+                              )
                               .toList(),
                         ),
                       ),
@@ -801,23 +1096,73 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
                     controller: _contentController,
                     maxLines: null,
                     decoration: InputDecoration(
-                      hintText: 'Start writing your thoughts...\n\nTip: Use the AI tools below to summarize, improve, or convert to tasks!',
+                      hintText:
+                          'Start writing your thoughts...\n\nTip: Use the AI tools below to summarize, improve, or convert to tasks!',
                       hintStyle: TextStyle(
-                          color: textColor.withOpacity(0.3), fontSize: 15, height: 1.6),
+                        color: textColor.withOpacity(0.3),
+                        fontSize: 15,
+                        height: 1.6,
+                      ),
                       border: InputBorder.none,
                     ),
-                    style: TextStyle(color: textColor, fontSize: 15, height: 1.6),
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 15,
+                      height: 1.6,
+                    ),
                   ),
 
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 16),
+
+                  // AI Action Bar
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        _buildAIActionButton(
+                          icon: Icons.auto_awesome_rounded,
+                          label: 'Summarize',
+                          onPressed: () => _runAI('summarize'),
+                        ),
+                        _buildAIActionButton(
+                          icon: Icons.edit_note_rounded,
+                          label: 'Rewrite',
+                          onPressed: () => _runAI('rewrite'),
+                        ),
+                        _buildAIActionButton(
+                          icon: Icons.format_list_bulleted_rounded,
+                          label: 'Points',
+                          onPressed: () => _runAI('points'),
+                        ),
+                        _buildAIActionButton(
+                          icon: Icons.format_list_numbered_rounded,
+                          label: 'List',
+                          onPressed: () => _runAI('list'),
+                        ),
+                        _buildAIActionButton(
+                          icon: Icons.table_chart_rounded,
+                          label: 'Table',
+                          onPressed: () => _runAI('table'),
+                        ),
+                        _buildAIActionButton(
+                          icon: Icons.translate_rounded,
+                          label: 'Translate',
+                          onPressed: () => _runAI('translate'),
+                        ),
+                        _buildAIActionButton(
+                          icon: Icons.checklist_rtl_rounded,
+                          label: 'To Tasks',
+                          onPressed: () => _runAI('tasks'),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
 
                   // Voice note playback
                   if (_recordedFilePath != null)
                     _buildVoiceNoteCard(cardColor, textColor),
-
-                  // AI Toolbar
-                  const SizedBox(height: 16),
-                  _buildAIToolbar(textColor),
                 ],
               ),
             ),
@@ -851,19 +1196,27 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Text('Voice note recorded',
-                style: TextStyle(color: textColor.withOpacity(0.8), fontSize: 13)),
+            child: Text(
+              'Voice note recorded',
+              style: TextStyle(color: textColor.withOpacity(0.8), fontSize: 13),
+            ),
           ),
           IconButton(
             icon: Icon(
-              _isPlayingPreview ? Icons.pause_circle_filled : Icons.play_circle_filled,
+              _isPlayingPreview
+                  ? Icons.pause_circle_filled
+                  : Icons.play_circle_filled,
               color: const Color(0xFF2ECC71),
               size: 28,
             ),
             onPressed: _togglePreviewPlayback,
           ),
           IconButton(
-            icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 22),
+            icon: const Icon(
+              Icons.delete_outline_rounded,
+              color: Colors.redAccent,
+              size: 22,
+            ),
             onPressed: () => setState(() => _recordedFilePath = null),
           ),
         ],
@@ -871,111 +1224,19 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
     );
   }
 
-  Widget _buildAIToolbar(Color textColor) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const Icon(Icons.auto_awesome, color: Color(0xFF2ECC71), size: 14),
-            const SizedBox(width: 6),
-            Text('AI Tools',
-                style: TextStyle(
-                    color: textColor.withOpacity(0.6),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.8)),
-          ],
-        ),
-        const SizedBox(height: 10),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              _aiChip(
-                icon: Icons.summarize_rounded,
-                label: 'Summarize',
-                onTap: () => _runAI('summarize'),
-                active: _aiMode == 'summarize',
-              ),
-              const SizedBox(width: 8),
-              _aiChip(
-                icon: Icons.auto_fix_high_rounded,
-                label: 'Improve',
-                onTap: () => _runAI('improve'),
-                active: _aiMode == 'improve',
-              ),
-              const SizedBox(width: 8),
-              _aiChip(
-                icon: Icons.task_alt_rounded,
-                label: 'To Tasks',
-                onTap: () => _runAI('tasks'),
-                active: _aiMode == 'tasks',
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _aiChip({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-    bool active = false,
-  }) {
-    return GestureDetector(
-      onTap: _isAIProcessing ? null : onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: active
-              ? const Color(0xFF2ECC71).withOpacity(0.2)
-              : const Color(0xFF2A2F3F),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: active
-                ? const Color(0xFF2ECC71)
-                : Colors.grey.withOpacity(0.3),
-            width: 1,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 14,
-                color: _isAIProcessing && active
-                    ? Colors.grey
-                    : const Color(0xFF2ECC71)),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                color: _isAIProcessing && active
-                    ? Colors.grey
-                    : const Color(0xFF2ECC71),
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildBottomBar(Color textColor) {
     return Container(
       padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom + 12,
-          left: 16,
-          right: 16,
-          top: 8),
+        bottom: MediaQuery.of(context).viewInsets.bottom + 12,
+        left: 16,
+        right: 16,
+        top: 8,
+      ),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1E2B),
-        border: Border(top: BorderSide(color: Colors.grey.withOpacity(0.15))),
+        color: Colors.white,
+        border: Border(
+          top: BorderSide(color: const Color(0xFF1A237E).withOpacity(0.05)),
+        ),
       ),
       child: Row(
         children: [
@@ -987,7 +1248,9 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: _isRecording ? Colors.redAccent : const Color(0xFF2ECC71),
+                color: _isRecording
+                    ? Colors.redAccent
+                    : Theme.of(context).primaryColor,
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -1004,18 +1267,46 @@ class _AddNoteScreenState extends State<AddNoteScreen> with TickerProviderStateM
                 children: [
                   Icon(Icons.circle, color: Colors.redAccent, size: 8),
                   SizedBox(width: 4),
-                  Text('Hold to record...',
-                      style: TextStyle(
-                          color: Colors.redAccent,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600)),
+                  Text(
+                    'Hold to record...',
+                    style: TextStyle(
+                      color: Colors.redAccent,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ],
               ),
             ),
+          if (_detectedLanguageCode != null) ...[
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Theme.of(context).primaryColor.withOpacity(0.3),
+                  width: 0.5,
+                ),
+              ),
+              child: Text(
+                LanguageUtils.getLanguageLabel(_detectedLanguageCode!),
+                style: TextStyle(
+                  color: Theme.of(context).primaryColor,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
           const Spacer(),
           // Scan document
           IconButton(
-            icon: Icon(Icons.document_scanner_outlined, color: textColor.withOpacity(0.5)),
+            icon: Icon(
+              Icons.document_scanner_outlined,
+              color: textColor.withOpacity(0.5),
+            ),
             tooltip: 'Scan Document',
             onPressed: _showScanOptions,
           ),

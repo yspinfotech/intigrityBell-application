@@ -1,0 +1,6 @@
+﻿  final TextRecognitionScript script;
+  TextRecognizer({this.script = TextRecognitionScript.latin});
+      'script': script.index
+enum TextRecognitionScript {
+  latin,
+  chinese,

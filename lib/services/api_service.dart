@@ -7,7 +7,7 @@ class ApiService {
   /// ─── IMPORTANT: Automatic local host detection for testing.
   /// For Android Emulator → 10.0.2.2
   /// For Web / Desktop / iOS Simulator → 127.0.0.1 or localhost
-  static const String _defaultHost = '192.168.1.13';
+  static const String _defaultHost = '192.168.1.12';
   static const int _serverPort = 8000;
 
   static String get baseUrl {
